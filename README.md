@@ -52,6 +52,12 @@ En ambos casos, cada `git push` publica la versión nueva automáticamente.
 
 Que abran el enlace en Safari (iPhone) o Chrome (Android) y usen **Agregar a inicio** / **Agregar a pantalla de inicio**.
 
+## Seguridad (PIN)
+
+La app tiene una tarjeta **Seguridad** donde cada persona puede activar un PIN de 4 a 8 números. Con PIN activo, la app lo pide al abrirla y tras 30 segundos fuera de ella. Tras 5 intentos fallidos espera 30 segundos. Si alguien olvida su PIN, la única salida es restablecerlo borrando los datos del dispositivo, y luego usar **Importar copia**.
+
+El PIN evita que otra persona vea los datos al tomar el celular, pero **no cifra** la información guardada. No reemplaza a un login con cuenta de usuario.
+
 ## Importante
 
 - Los datos son por dispositivo: si cambian de celular o borran los datos del navegador, los pierden. Recomiéndales usar **Descargar copia (JSON)** de vez en cuando y **Importar copia** para restaurar.

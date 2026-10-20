@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Mis finanzas</title>
 <meta name="theme-color" content="#000000">
+<script>try{if(localStorage.getItem('finanzas_pin'))document.documentElement.classList.add('locked')}catch(e){}</script>
 <meta name="apple-mobile-web-app-title" content="Mis finanzas">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <link rel="manifest" href="manifest.webmanifest">
@@ -38,6 +39,12 @@ button{cursor:pointer}button.p{background:var(--ac);color:var(--bg);border-color
 .cat{display:flex;justify-content:space-between;font-size:13px;margin-top:8px}
 .empty{color:var(--tx2);text-align:center;padding:14px 0}
 button:disabled{opacity:.35;cursor:default}
+#lock{display:none;position:fixed;inset:0;z-index:99;background:#000;align-items:center;justify-content:center;padding:24px}
+html.locked #lock{display:flex}
+html.locked main{display:none}
+.lk{width:100%;max-width:320px;text-align:center;display:flex;flex-direction:column;gap:10px}
+.lk input{text-align:center;font-size:22px;letter-spacing:6px}
+#lkErr{color:var(--bad);font-size:13px;min-height:18px}
 label.btn{font:inherit;color:var(--tx);background:var(--card);border:1px solid var(--bd);border-radius:8px;padding:8px 10px}
 .dona{width:150px;height:150px;border-radius:50%;position:relative;flex-shrink:0}
 .dona::after{content:'';position:absolute;inset:24px;background:var(--card);border-radius:50%}
@@ -54,6 +61,7 @@ label.btn{font:inherit;color:var(--tx);background:var(--card);border:1px solid v
 </style>
 </head>
 <body>
+<div id="lock" role="dialog" aria-modal="true"><div class="lk"><div style="font-size:42px">🔒</div><h2>Mis finanzas</h2><p style="color:var(--tx2);margin:0">Ingresa tu PIN para continuar</p><input id="lkPin" type="password" inputmode="numeric" autocomplete="off" maxlength="8" placeholder="PIN" aria-label="PIN"><button class="p" id="lkGo">Entrar</button><div id="lkErr"></div><button id="lkForgot" style="border:0;background:none;color:var(--tx2);font-size:13px">Olvidé mi PIN</button></div></div>
 <main>
 <div class="top"><h1>Mis finanzas</h1><input type="month" id="mes" aria-label="Mes"><div style="display:flex;gap:6px"><button id="atras" disabled aria-label="Deshacer">↶ Atrás</button><button id="adelante" disabled aria-label="Rehacer">Adelante ↷</button></div></div>
 <details class="card" open><summary style="cursor:pointer;font-weight:600">¿Cómo se usa?</summary><ol style="padding-left:18px;margin:10px 0 0;color:var(--tx2);font-size:14px"><li>Los cuadros de arriba (Ingresos, Gastado, Por pagar, Te sobra) se calculan solos. Tú no los escribes.</li><li>Para llenarlos usa Agregar movimiento: elige el tipo, escribe qué fue, el monto y toca Agregar.</li><li>Ingreso es dinero que recibes (sueldo, comisión). Gasto es algo que ya pagaste. Por pagar es una cuenta pendiente; cuando la pagues toca Pagado.</li><li>En Gastos fijos registra lo que se repite cada mes (alquiler, internet) y aparecerá solo como por pagar en cada mes.</li><li>En el monto puedes escribir operaciones: 25*4 multiplica, 120/3 divide, 50+30-10 suma y resta.</li></ol></details>
@@ -83,6 +91,10 @@ label.btn{font:inherit;color:var(--tx);background:var(--card);border:1px solid v
 <div class="card"><h2>Movimientos del mes</h2><div id="lista"></div></div>
 <div class="card"><h2>Calculadora</h2><input id="calc" inputmode="decimal" placeholder="Ej. 120/3 o 25*4+10" style="width:100%"><div class="ops"><button type="button" onclick="ins('+','calc')">+</button><button type="button" onclick="ins('-','calc')">−</button><button type="button" onclick="ins('*','calc')">×</button><button type="button" onclick="ins('/','calc')">÷</button><button type="button" onclick="ins('(','calc')">(</button><button type="button" onclick="ins(')','calc')">)</button><button type="button" onclick="ins('<','calc')">⌫</button><button type="button" onclick="ins('C','calc')">C</button></div>
 <div id="calcOut" style="font-size:20px;font-weight:600;margin-top:8px"></div><button type="button" class="p" style="margin-top:8px" onclick="usar()">Usar resultado en el monto</button></div>
+<div class="card"><h2>Seguridad</h2><p id="secTxt" style="margin:0 0 10px;color:var(--tx2);font-size:13px"></p>
+<div class="f" id="secOff"><input id="npin" type="password" inputmode="numeric" maxlength="8" placeholder="Nuevo PIN (4 a 8 números)"><input id="npin2" type="password" inputmode="numeric" maxlength="8" placeholder="Repite el PIN"><button class="p" id="pinOn">Activar PIN</button></div>
+<div class="f" id="secOn"><button id="lockNow">Bloquear ahora</button><input id="cpin" type="password" inputmode="numeric" maxlength="8" placeholder="PIN actual"><button id="pinOff">Quitar PIN</button></div>
+<div id="secErr" style="color:var(--bad);font-size:13px;margin-top:6px"></div></div>
 <div class="card"><h2>Corregir o empezar de cero</h2><p style='margin:0 0 10px;color:var(--tx2);font-size:13px'>Para borrar un solo movimiento usa el botón Borrar que aparece en cada línea de Movimientos del mes. Estos botones borran en bloque y piden confirmación. Si te equivocas, usa Atrás (arriba) para recuperar lo borrado.</p><div style="display:flex;gap:8px;flex-wrap:wrap"><button id="clrMes">Borrar movimientos de este mes</button><button id="clrAll" style="color:var(--bad);border-color:var(--bad)">Borrar todo y empezar de cero</button></div></div>
 <div style="display:flex;gap:8px;flex-wrap:wrap"><button id="exp">Descargar copia (JSON)</button><label class="btn" style="cursor:pointer"><input type="file" id="imp" accept=".json,application/json" hidden>Importar copia</label></div>
 <p id="est" style="color:var(--tx2);font-size:12px"></p>
@@ -183,6 +195,34 @@ function twoStep(btn,txt,fn){var t;btn.onclick=function(){if(btn.dataset.s==='1'
 twoStep($('clrMes'),'Borrar movimientos de este mes',function(){var m=$('mes').value;S.items.forEach(function(i){if(i.fid&&i.date.slice(0,7)===m)S.skip.push(i.fid+'|'+m)});S.items=S.items.filter(function(i){return i.date.slice(0,7)!==m});save();render()});
 twoStep($('clrAll'),'Borrar todo y empezar de cero',function(){S={items:[],goal:0,fixed:[],skip:[]};save();render()});
 $('atras').onclick=undoF;$('adelante').onclick=redoF;
+var PK='finanzas_pin',fails=0,until=0,hiddenAt=0;
+function pinData(){try{return JSON.parse(localStorage.getItem(PK))}catch(e){return null}}
+function hasPin(){return !!pinData()}
+function b64(buf){var s='';new Uint8Array(buf).forEach(function(b){s+=String.fromCharCode(b)});return btoa(s)}
+function hashPin(pin,saltB64){var salt=Uint8Array.from(atob(saltB64),function(c){return c.charCodeAt(0)});
+ return crypto.subtle.importKey('raw',new TextEncoder().encode(pin),'PBKDF2',false,['deriveBits']).then(function(k){return crypto.subtle.deriveBits({name:'PBKDF2',salt:salt,iterations:100000,hash:'SHA-256'},k,256)}).then(b64)}
+function cryptoOk(){return !!(window.crypto&&crypto.subtle)}
+function lock(){if(!hasPin())return;$('lkPin').value='';$('lkErr').textContent='';document.documentElement.classList.add('locked');setTimeout(function(){$('lkPin').focus()},50)}
+function unlock(){document.documentElement.classList.remove('locked')}
+function secUI(){var on=hasPin();$('secOff').style.display=on?'none':'';$('secOn').style.display=on?'':'none';
+ $('secTxt').textContent=on?'PIN activado: la app pedir\u00e1 tu PIN al abrirla y despu\u00e9s de 30 segundos fuera de ella.':'Crea un PIN para que nadie pueda ver tus datos al abrir la app en tu celular.'}
+$('lkGo').onclick=function(){var d=pinData();if(!d){unlock();return}
+ var now=Date.now();if(now<until){$('lkErr').textContent='Espera '+Math.ceil((until-now)/1000)+' s';return}
+ if(!cryptoOk()){$('lkErr').textContent='Tu navegador no permite verificar el PIN.';return}
+ hashPin($('lkPin').value,d.salt).then(function(h){if(h===d.hash){fails=0;unlock()}else{fails++;$('lkPin').value='';if(fails>=5){until=Date.now()+30000;fails=0;$('lkErr').textContent='Demasiados intentos. Espera 30 s.'}else $('lkErr').textContent='PIN incorrecto.'}})};
+$('lkPin').onkeydown=function(e){if(e.key==='Enter')$('lkGo').click()};
+$('lkForgot').onclick=function(){if(confirm('Para restablecer el PIN se borrar\u00e1n TODOS los datos de este dispositivo. Podr\u00e1s restaurar una copia con Importar copia. \u00bfContinuar?')){try{localStorage.removeItem(PK);localStorage.removeItem('finanzas_v1')}catch(e){}S={items:[],goal:0,fixed:[],skip:[]};last=JSON.stringify(S);undo.length=0;redo.length=0;unlock();secUI();render()}};
+$('pinOn').onclick=function(){var a=$('npin').value,b=$('npin2').value,e=$('secErr');e.style.color='var(--bad)';
+ if(!/^\d{4,8}$/.test(a)){e.textContent='El PIN debe tener de 4 a 8 n\u00fameros.';return}
+ if(a!==b){e.textContent='Los dos PIN no coinciden.';return}
+ if(!cryptoOk()){e.textContent='Tu navegador no permite crear el PIN.';return}
+ var salt=crypto.getRandomValues(new Uint8Array(16));
+ hashPin(a,b64(salt)).then(function(h){localStorage.setItem(PK,JSON.stringify({salt:b64(salt),hash:h}));$('npin').value='';$('npin2').value='';e.style.color='var(--ok)';e.textContent='PIN activado.';secUI()}).catch(function(){e.textContent='No se pudo guardar el PIN.'})};
+$('pinOff').onclick=function(){var d=pinData(),e=$('secErr');e.style.color='var(--bad)';if(!d)return;
+ hashPin($('cpin').value,d.salt).then(function(h){if(h===d.hash){localStorage.removeItem(PK);$('cpin').value='';e.style.color='var(--ok)';e.textContent='PIN desactivado.';secUI()}else e.textContent='PIN actual incorrecto.'})};
+$('lockNow').onclick=lock;
+document.addEventListener('visibilitychange',function(){if(document.hidden){hiddenAt=Date.now()}else if(hasPin()&&hiddenAt&&Date.now()-hiddenAt>30000){lock()}});
+secUI();if(hasPin())lock();
 $('mes').onchange=render;
 $('meta').oninput=function(){S.goal=parseFloat(this.value)||0;save('goal');render()};
 $('add').onclick=function(){try{agregar()}catch(e){toast('Error: '+e.message,1)}};
