@@ -73,7 +73,7 @@ label.chk input{width:18px;height:18px;padding:0}
 <main>
 <div id="lic" hidden style="border-radius:10px;padding:10px 12px;margin-bottom:12px;font-size:14px"></div>
 <div class="top"><h1>Mis finanzas</h1><input type="month" id="mes" aria-label="Mes"><div style="display:flex;gap:6px;flex-wrap:wrap"><button id="atras" disabled aria-label="Deshacer">↶ Atrás</button><button id="adelante" disabled aria-label="Rehacer">Adelante ↷</button><button id="opt" aria-expanded="false" aria-controls="opts">Opciones ▾</button></div></div>
-<div class="card" id="movBox" hidden><h2>Ya hay una dirección nueva</h2><p style="margin:0 0 10px;color:var(--tx2);font-size:14px">Esta dirección dejará de usarse. Toca el botón y tus datos pasan solos a la dirección nueva.</p><button class="p" id="movBtn">Mover mis datos a la nueva dirección</button><button id="movCopy" style="margin-top:8px">Copiar enlace (si el botón no funciona)</button><p style="margin:8px 0 0;color:var(--tx2);font-size:12px">En iPhone: primero instala la app nueva en tu pantalla de inicio, ábrela, entra con tu código y ahí usa Opciones &gt; Importar datos de mi app anterior pegando este enlace.</p></div>
+<div class="card" id="movBox" hidden><h2>Ya hay una dirección nueva</h2><p style="margin:0 0 10px;color:var(--tx2);font-size:14px">Esta dirección dejará de usarse. Toca el botón y tus datos pasan solos a la dirección nueva.</p><button class="p" id="movBtn">Mover mis datos a la nueva dirección</button><button id="movCopy" style="margin-top:8px">Copiar enlace (si el botón no funciona)</button><textarea id="movLink" hidden readonly rows="4" style="width:100%;margin-top:8px;background:#000;color:var(--tx);border:1px solid var(--bd);border-radius:10px;padding:8px;font-size:12px"></textarea><p style="margin:8px 0 0;color:var(--tx2);font-size:12px">En iPhone: primero instala la app nueva en tu pantalla de inicio, ábrela, entra con tu código y ahí usa Opciones &gt; Importar datos de mi app anterior pegando este enlace.</p></div>
 <div class="card" id="migBox" hidden><h2>Importar datos de tu app anterior</h2><p id="migTxt" style="margin:0 0 10px;color:var(--tx2);font-size:14px"></p><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="p" id="migGo">Importar</button><button id="migNo">No, empezar vacío</button></div></div>
 <div class="card" id="opts" hidden>
 <details class="sec"><summary>Gastos por categoría</summary><div id="cats" style="margin-top:6px"></div></details>
@@ -267,8 +267,14 @@ function cleanData(d){
 function moveOk(){try{return !!MOVE_TO&&(MOVE_ON||/[?&]mudanza=1/.test(location.search))&&new URL(MOVE_TO).origin!==location.origin}catch(e){return false}}
 $('movBtn').onclick=function(){packData().then(function(p){if(p.length>60000){toast('Tienes muchos datos para moverlos con un toque. Usa Descargar copia e Importar copia.',1);return}
  location.href=MOVE_TO.replace(/\/+$/,'')+'/#migrar='+p})};
-$('movCopy').onclick=function(){packData().then(function(p){var u=MOVE_TO.replace(/\/+$/,'')+'/#migrar='+p;
- (navigator.clipboard?navigator.clipboard.writeText(u):Promise.reject()).then(function(){toast('✓ Enlace copiado')},function(){prompt('Copia este enlace:',u)})})};
+var MOVE_LINK='';
+function prepLink(){packData().then(function(p){MOVE_LINK=MOVE_TO.replace(/\/+$/,'')+'/#migrar='+p})}
+function showLink(u){var x=$('movLink');x.value=u;x.hidden=false;x.focus();x.select();try{x.setSelectionRange(0,u.length)}catch(e){}toast('Mantén presionado el cuadro y elige Copiar',1)}
+$('movCopy').onclick=function(){var u=MOVE_LINK;
+ if(!u){packData().then(function(p){showLink(MOVE_TO.replace(/\/+$/,'')+'/#migrar='+p)});return}
+ function ok(){toast('✓ Enlace copiado')}
+ function legacy(){var x=$('movLink');x.value=u;x.hidden=false;x.focus();x.select();try{x.setSelectionRange(0,u.length);if(document.execCommand('copy')){ok();return}}catch(e){}showLink(u)}
+ try{navigator.clipboard.writeText(u).then(ok,legacy)}catch(e){legacy()}};
 var migPayload=null;
 function mostrarMig(raw){unpackData(raw).then(function(d){var c=cleanData(d);migPayload=c;
   $('migTxt').textContent='Encontramos los datos de tu app anterior: '+c.items.length+' registros. '+((S.items.length||S.fixed.length)?'Importarlos reemplazará lo que ya tienes aquí. ':'')+'¿Quieres importarlos?';
@@ -304,7 +310,7 @@ $('imp').onchange=function(){var f=this.files[0];if(!f)return;var r=new FileRead
 var l=lsGet();if(l&&l.items){S=Object.assign({goal:0,fixed:[],skip:[]},l)}last=JSON.stringify(S);
 render();
 $('est').textContent='Tus datos se guardan en este dispositivo. Usa Descargar copia para respaldarlos.';
-checkMig();if(moveOk())$('movBox').hidden=false;
+checkMig();if(moveOk()){$('movBox').hidden=false;prepLink()}
 
 (function(){fetch('/api/estado',{credentials:'same-origin'}).then(function(r){var ct=r.headers.get('content-type')||'';if(ct.indexOf('json')<0)return null;return r.json()}).then(function(d){
  if(!d)return;if(d.estado==='vencido'||d.estado==='inactivo'){location.reload();return}
