@@ -67,6 +67,7 @@ label.btn{font:inherit;color:var(--tx);background:var(--card);border:1px solid v
 <details class="card" open><summary style="cursor:pointer;font-weight:600">¿Cómo se usa?</summary><ol style="padding-left:18px;margin:10px 0 0;color:var(--tx2);font-size:14px"><li>Los cuadros de arriba (Ingresos, Gastado, Por pagar, Te sobra) se calculan solos. Tú no los escribes.</li><li>Para llenarlos usa Agregar movimiento: elige el tipo, escribe qué fue, el monto y toca Agregar.</li><li>Ingreso es dinero que recibes (sueldo, comisión). Gasto es algo que ya pagaste. Por pagar es una cuenta pendiente; cuando la pagues toca Pagado.</li><li>En Gastos fijos registra lo que se repite cada mes (alquiler, internet) y aparecerá solo como por pagar en cada mes.</li><li>En el monto puedes escribir operaciones: 25*4 multiplica, 120/3 divide, 50+30-10 suma y resta.</li></ol></details>
 <div id="alerta"></div>
 <div class="grid" id="res"></div>
+<div id="libre" style="color:var(--tx2);font-size:13px;margin:-4px 0 12px"></div>
 <div class="card"><h2>Meta de ahorro del mes</h2>
 <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><input type="number" id="meta" min="0" step="1" placeholder="Ej. 300" style="width:130px"><span id="metaTxt" style="color:var(--tx2);font-size:14px"></span></div>
 <div class="bar"><i id="metaBar" style="width:0%"></i></div></div>
@@ -124,13 +125,15 @@ function el(t,c,x){var e=document.createElement(t);if(c)e.className=c;if(x!=null
 function render(){
  var m=$('mes').value;ensureFixed(m);var its=S.items.filter(function(i){return i.date.slice(0,7)===m});
  var sum=function(t){return its.filter(function(i){return i.type===t}).reduce(function(a,i){return a+i.amount},0)};
- var ing=sum('ingreso'),gas=sum('gasto'),pen=sum('pendiente'),sob=ing-gas-pen;
+ var ing=sum('ingreso'),gas=sum('gasto'),pen=sum('pendiente'),sob=ing-gas,lib=ing-gas-pen;
  var r=$('res');r.textContent='';
  [['Ingresos',ing,'in'],['Gastado',gas,'out'],['Por pagar',pen,''],['Te sobra',sob,sob<0?'out':'in']].forEach(function(a){
   var d=el('div','m');d.appendChild(el('small',0,a[0]));var b=el('b',a[2],money(a[1]));d.appendChild(b);r.appendChild(d)});
  var al=$('alerta');al.textContent='';
- if(sob<0){var a=el('div','alert','Ojo: entre lo gastado y lo que falta pagar te pasas por '+money(-sob)+'.');a.style.background='var(--badbg)';a.style.color='var(--bad)';al.appendChild(a)}
- else if(ing>0&&sob<ing*0.1){var a2=el('div','alert','Te queda poco margen: solo '+money(sob)+' después de pagar todo.');a2.style.background='var(--warnbg)';a2.style.color='var(--warn)';al.appendChild(a2)}
+ if(sob<0){var a=el('div','alert','Ojo: ya gastaste '+money(-sob)+' más de lo que te ingresó.');a.style.background='var(--badbg)';a.style.color='var(--bad)';al.appendChild(a)}
+ else if(lib<0){var a1=el('div','alert','Cuando pagues todo lo pendiente te faltarían '+money(-lib)+'.');a1.style.background='var(--warnbg)';a1.style.color='var(--warn)';al.appendChild(a1)}
+ else if(ing>0&&pen>0&&lib<ing*0.1){var a2=el('div','alert','Te queda poco margen: después de pagar lo pendiente tendrías solo '+money(lib)+'.');a2.style.background='var(--warnbg)';a2.style.color='var(--warn)';al.appendChild(a2)}
+ $('libre').textContent=pen>0?'Lo por pagar no se descuenta hasta que toques Pagado. Si pagas todo lo pendiente te quedarían '+money(lib)+'.':'';
  var g=S.goal||0,prog=g>0?Math.max(0,Math.min(100,sob/g*100)):0;
  $('metaBar').style.width=prog+'%';
  $('metaTxt').textContent=g>0?(sob>=g?'Meta alcanzada: te sobran '+money(sob):'Te faltan '+money(g-Math.max(sob,0))+' para tu meta'):'Define cuánto quieres ahorrar';
@@ -160,7 +163,7 @@ function render(){
   del.onclick=function(){if(i.fid)S.skip.push(i.fid+'|'+i.date.slice(0,7));S.items=S.items.filter(function(x){return x!==i});save();render()};
   ac.appendChild(amt);ac.appendChild(del);row.appendChild(l);row.appendChild(ac);L.appendChild(row)});
  if($('meta')!==document.activeElement)$('meta').value=g||'';
- charts(ing,gas,pen,sob);fixedList();
+ charts(ing,gas,pen,lib);fixedList();
 }
 function calc(s){s=String(s).replace(/s\/\.?/gi,'').replace(/soles?/gi,'').replace(/,/g,'.').replace(/[x×]/gi,'*').replace(/÷/g,'/').replace(/\s+/g,'');
  if(!s||!/^[0-9+\-*/().]+$/.test(s))return NaN;var p=0;
@@ -173,7 +176,7 @@ function fixedList(){var F=$('flist');F.textContent='';if(!S.fixed.length){F.app
  S.fixed.forEach(function(f){var row=el('div','row'),l=el('div');l.appendChild(el('div',0,f.desc));l.appendChild(el('small',0,'Día '+f.day+' de cada mes · '+f.cat));var ac=el('div','acts');ac.appendChild(el('b',0,money(f.amount)));var b=el('button',0,'Quitar');b.onclick=function(){S.fixed=S.fixed.filter(function(x){return x!==f});S.items=S.items.filter(function(i){return !(i.fid===f.id&&i.type==='pendiente')});save();render()};ac.appendChild(b);row.appendChild(l);row.appendChild(ac);F.appendChild(row)});
  F.appendChild(el('div','empty','Total fijo al mes: '+money(S.fixed.reduce(function(a,f){return a+f.amount},0))))}
 function charts(ing,gas,pen,sob){var tot=Math.max(ing,gas+pen),D=$('dona'),lg=$('leyenda');lg.textContent='';
- var parts=[['Gastado',gas,'#E24B4A'],['Por pagar',pen,'#EF9F27'],['Te sobra',Math.max(sob,0),'#639922']];
+ var parts=[['Gastado',gas,'#E24B4A'],['Por pagar',pen,'#EF9F27'],['Libre tras pagar lo pendiente',Math.max(sob,0),'#639922']];
  parts.forEach(function(p){var d=el('div');var dot=el('i');dot.style.background=p[2];d.appendChild(dot);d.appendChild(el('span',0,p[0]+': '+money(p[1])));lg.appendChild(d)});
  if(!(tot>0)){D.style.background='var(--bd)';$('donaTx').textContent='Sin datos'}else{var acc=0,st=[];parts.forEach(function(p){var s=acc;acc+=p[1]/tot*100;st.push(p[2]+' '+s+'% '+acc+'%')});if(acc<100)st.push('var(--bd) '+acc+'% 100%');D.style.background='conic-gradient('+st.join(',')+')';$('donaTx').textContent='Ahorro '+Math.round(Math.max(sob,0)/tot*100)+'%'}
  var B=$('barras');B.textContent='';var base=$('mes').value;if(!base)return;var y=+base.slice(0,4),mo=+base.slice(5,7),ms=[],N=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
