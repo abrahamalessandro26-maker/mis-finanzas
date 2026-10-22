@@ -84,7 +84,7 @@ label.btn{font:inherit;color:var(--tx);background:var(--card);border:1px solid v
 <div id="vista" style="color:var(--ac);font-size:13px;margin-top:6px"></div><div id="err" style="color:var(--bad);font-size:13px;margin-top:6px"></div></div>
 <div class="card"><h2>Gastos fijos mensuales</h2><p style='margin:0 0 10px;color:var(--tx2);font-size:13px'>Lo que pagas todos los meses. Se agrega solo como por pagar cada mes.</p>
 <div class="f"><input id="fdesc" placeholder="Ej. Alquiler"><input id="fmonto" inputmode="decimal" placeholder="Monto"><select id="fcat"></select><input id="fdia" type="number" min="1" max="31" placeholder="Día de pago"><button class="p" id="fadd">Agregar fijo</button></div>
-<div id="ferr" style="color:var(--bad);font-size:13px;margin:6px 0"></div><div id="flist"></div></div>
+<div id="ferr" style="color:var(--bad);font-size:13px;margin:6px 0"></div><details id="fdet"><summary id="fsum" style="cursor:pointer;color:var(--ac);font-size:14px;margin:4px 0 8px"></summary><div id="flist" style="max-height:320px;overflow-y:auto"></div></details></div>
 <div class="card"><h2>Adónde va tu ingreso</h2><div class="dw"><div class="dona" id="dona"><span id="donaTx"></span></div><div class="lg" id="leyenda"></div></div></div>
 <div class="card"><h2>Últimos 6 meses</h2><div style="font-size:12px;color:var(--tx2);margin-bottom:8px"><span style="color:#97C459">■</span> Ingresos &nbsp; <span style="color:#F09595">■</span> Gastos (con lo por pagar)</div><div class="barras" id="barras"></div></div>
 <div class="card"><h2>Por pagar</h2><div id="pend"></div></div>
@@ -122,6 +122,9 @@ function persist(){
  timer=setTimeout(function(){ref.set({items:S.items,goal:S.goal,fixed:S.fixed,skip:S.skip}).then(function(){$('est').textContent='Guardado'}).catch(function(){$('est').textContent='No se pudo guardar en la nube; queda en este navegador.'})},400);
 }
 function el(t,c,x){var e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;return e}
+var EX={P:0,L:0},LIM=5;
+function lim(a,k){return EX[k]?a:a.slice(0,LIM)}
+function more(c,a,k){if(a.length<=LIM)return;var b=el('button',0,EX[k]?'Ver menos':'Ver todos ('+a.length+')');b.style.marginTop='8px';b.onclick=function(){EX[k]=EX[k]?0:1;render()};c.appendChild(b)}
 function render(){
  var m=$('mes').value;ensureFixed(m);var its=S.items.filter(function(i){return i.date.slice(0,7)===m});
  var sum=function(t){return its.filter(function(i){return i.type===t}).reduce(function(a,i){return a+i.amount},0)};
@@ -140,13 +143,13 @@ function render(){
  var p=$('pend');p.textContent='';
  var pl=its.filter(function(i){return i.type==='pendiente'}).sort(function(a,b){return a.date<b.date?-1:1});
  if(!pl.length)p.appendChild(el('div','empty','No tienes pagos pendientes este mes.'));
- pl.forEach(function(i){
+ lim(pl,'P').forEach(function(i){
   var row=el('div','row'),l=el('div');l.appendChild(el('div',0,i.desc));
   var late=i.date<today;l.appendChild(el('small',0,'Vence '+i.date+(late?' (vencido)':'')+' · '+i.cat));
   if(late)l.lastChild.style.color='var(--bad)';
   var ac=el('div','acts');ac.appendChild(el('b',0,money(i.amount)));
   var pb=el('button',0,'Pagado');pb.onclick=function(){i.type='gasto';save();render()};ac.appendChild(pb);
-  row.appendChild(l);row.appendChild(ac);p.appendChild(row)});
+  row.appendChild(l);row.appendChild(ac);p.appendChild(row)});more(p,pl,'P');
  var c=$('cats');c.textContent='';var by={};
  its.filter(function(i){return i.type!=='ingreso'}).forEach(function(i){by[i.cat]=(by[i.cat]||0)+i.amount});
  var tot=gas+pen,keys=Object.keys(by).sort(function(a,b){return by[b]-by[a]});
@@ -155,13 +158,13 @@ function render(){
   var bar=el('div','bar');var f=el('i');f.style.width=(by[k]/tot*100)+'%';bar.appendChild(f);w.appendChild(h);w.appendChild(bar);c.appendChild(w)});
  var L=$('lista');L.textContent='';
  if(!its.length)L.appendChild(el('div','empty','Agrega tu primer movimiento arriba.'));
- its.slice().sort(function(a,b){return a.date<b.date?1:-1}).forEach(function(i){
+ var ml=its.slice().sort(function(a,b){return a.date<b.date?1:-1});lim(ml,'L').forEach(function(i){
   var row=el('div','row'),l=el('div');l.appendChild(el('div',0,i.desc));
   var sm=el('small',0,i.date+' · '+i.cat+' ');if(i.type==='pendiente')sm.appendChild(el('span','tag','por pagar'));l.appendChild(sm);
   var ac=el('div','acts'),amt=el('b',i.type==='ingreso'?'in':'out',(i.type==='ingreso'?'+ ':'- ')+money(i.amount));
   var del=el('button',0,'Borrar');del.setAttribute('aria-label','Borrar movimiento');
   del.onclick=function(){if(i.fid)S.skip.push(i.fid+'|'+i.date.slice(0,7));S.items=S.items.filter(function(x){return x!==i});save();render()};
-  ac.appendChild(amt);ac.appendChild(del);row.appendChild(l);row.appendChild(ac);L.appendChild(row)});
+  ac.appendChild(amt);ac.appendChild(del);row.appendChild(l);row.appendChild(ac);L.appendChild(row)});more(L,ml,'L');
  if($('meta')!==document.activeElement)$('meta').value=g||'';
  charts(ing,gas,pen,lib);fixedList();
 }
@@ -172,7 +175,7 @@ function calc(s){s=String(s).replace(/s\/\.?/gi,'').replace(/soles?/gi,'').repla
  function fa(){if(s[p]==='-'){p++;return -fa()}if(s[p]==='+'){p++;return fa()}if(s[p]==='('){p++;var v=ex();if(s[p]!==')')return NaN;p++;return v}var q=/^\d+\.?\d*|^\.\d+/.exec(s.slice(p));if(!q)return NaN;p+=q[0].length;return parseFloat(q[0])}
  var r=ex();return p===s.length&&isFinite(r)?r:NaN}
 function ensureFixed(m){if(!m)return;var ch=false;S.fixed.forEach(function(f){if(m<f.start)return;if(S.skip.indexOf(f.id+'|'+m)>=0)return;if(S.items.some(function(i){return i.fid===f.id&&i.date.slice(0,7)===m}))return;var dd=Math.min(f.day,28);S.items.push({id:Date.now()+Math.random(),type:'pendiente',desc:f.desc,amount:f.amount,cat:f.cat,date:m+'-'+(dd<10?'0':'')+dd,fid:f.id});ch=true});if(ch)save('auto')}
-function fixedList(){var F=$('flist');F.textContent='';if(!S.fixed.length){F.appendChild(el('div','empty','Aún no tienes gastos fijos. Agrega alquiler, internet, suscripciones...'));return}
+function fixedList(){var F=$('flist');F.textContent='';var n=S.fixed.length;$('fsum').textContent=n?'Ver mis gastos fijos ('+n+') · total '+money(S.fixed.reduce(function(a,f){return a+f.amount},0)):'Mis gastos fijos';if(!n)$('fdet').open=true;if(!S.fixed.length){F.appendChild(el('div','empty','Aún no tienes gastos fijos. Agrega alquiler, internet, suscripciones...'));return}
  S.fixed.forEach(function(f){var row=el('div','row'),l=el('div');l.appendChild(el('div',0,f.desc));l.appendChild(el('small',0,'Día '+f.day+' de cada mes · '+f.cat));var ac=el('div','acts');ac.appendChild(el('b',0,money(f.amount)));var b=el('button',0,'Quitar');b.onclick=function(){S.fixed=S.fixed.filter(function(x){return x!==f});S.items=S.items.filter(function(i){return !(i.fid===f.id&&i.type==='pendiente')});save();render()};ac.appendChild(b);row.appendChild(l);row.appendChild(ac);F.appendChild(row)});
  F.appendChild(el('div','empty','Total fijo al mes: '+money(S.fixed.reduce(function(a,f){return a+f.amount},0))))}
 function charts(ing,gas,pen,sob){var tot=Math.max(ing,gas+pen),D=$('dona'),lg=$('leyenda');lg.textContent='';
@@ -188,7 +191,7 @@ $('fcat').innerHTML=$('cat').innerHTML;
 $('fadd').onclick=function(){var d=$('fdesc').value.trim(),a=calc($('fmonto').value),dia=parseInt($('fdia').value,10);
  if(!d||!(a>0)||!(dia>=1&&dia<=31)){$('ferr').textContent='Completa descripción, monto y un día entre 1 y 31.';return}
  $('ferr').textContent='';S.fixed.push({id:'f'+Date.now(),desc:d,amount:a,cat:$('fcat').value,day:dia,start:$('mes').value||today.slice(0,7)});
- $('fdesc').value='';$('fmonto').value='';$('fdia').value='';save();render()};
+ $('fdesc').value='';$('fmonto').value='';$('fdia').value='';save();render();$('fdet').open=true};
 $('monto').oninput=function(){var v=calc(this.value);$('vista').textContent=(/[+*\/x×÷(]|.-/.test(this.value)&&!isNaN(v))?'= '+money(v):''};
 $('calc').oninput=function(){var v=calc(this.value);$('calcOut').textContent=this.value.trim()===''?'':(isNaN(v)?'Escribe una operación con + - * /':'= '+(Math.round(v*100)/100).toLocaleString('es-PE',{maximumFractionDigits:2}))};
 function ins(t,id){var e=$(id||'monto');if(t==='C')e.value='';else if(t==='<')e.value=e.value.slice(0,-1);else e.value+=t;if(e.oninput)e.oninput()}
