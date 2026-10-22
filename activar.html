@@ -6,7 +6,7 @@
 var $=function(i){return document.getElementById(i)};
 try{if(location.hash.indexOf('#migrar=')===0)sessionStorage.setItem('mig',location.hash)}catch(e){}
 var q=new URLSearchParams(location.search).get('c');if(q)$('c').value=q;
-$('c').oninput=function(){var v=this.value.toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,8);this.value=v.length>4?v.slice(0,4)+'-'+v.slice(4):v};
+$('c').oninput=function(){var raw=this.value.toUpperCase(),v=raw.replace(/[^A-Z0-9]/g,'').slice(0,8);this.value=v.length>4?v.slice(0,4)+'-'+v.slice(4):(v.length===4&&/-$/.test(raw)?v+'-':v)};
 function go(){var b=$('go');b.disabled=true;$('err').textContent='';
  fetch('/api/activar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({code:$('c').value})})
  .then(function(r){return r.json()}).then(function(d){
