@@ -247,7 +247,7 @@ $('pinOff').onclick=function(){var d=pinData(),e=$('secErr');e.style.color='var(
 $('lockNow').onclick=lock;
 document.addEventListener('visibilitychange',function(){if(document.hidden){hiddenAt=Date.now()}else if(hasPin()&&hiddenAt&&Date.now()-hiddenAt>30000){lock()}});
 secUI();if(hasPin())lock();
-var MOVE_TO='https://finanzasevan.com',MOVE_ON=false;
+var MOVE_TO='https://finanzasevan.com',MOVE_ON=true;
 function b64u(b){var s='';for(var i=0;i<b.length;i++)s+=String.fromCharCode(b[i]);return btoa(s).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'')}
 function unb64u(s){s=s.replace(/-/g,'+').replace(/_/g,'/');while(s.length%4)s+='=';var b=atob(s),a=new Uint8Array(b.length);for(var i=0;i<b.length;i++)a[i]=b.charCodeAt(i);return a}
 function gzipB(bytes,dec){return Promise.resolve().then(function(){var cs=new (dec?DecompressionStream:CompressionStream)('gzip'),w=cs.writable.getWriter();w.write(bytes);w.close();return new Response(cs.readable).arrayBuffer()}).then(function(b){return new Uint8Array(b)})}
