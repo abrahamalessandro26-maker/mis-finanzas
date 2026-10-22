@@ -2,7 +2,7 @@
 <h1>Administrador</h1>
 <div class="card" id="login"><p style="margin-top:0">Clave de administrador</p><input id="k" type="password" autocomplete="off"><button class="p" id="in">Entrar</button><div id="err"></div></div>
 <div id="app" hidden>
-<div class="card"><b>Nuevo cliente</b><div class="row" style="margin-top:8px"><input id="nm" placeholder="Nombre (ej. María)"><input id="dy" type="number" min="1" value="3" aria-label="Días de prueba"></div><button class="p" id="cr">Crear código</button></div>
+<div class="card"><b>Nuevo cliente</b><div class="row" style="margin-top:8px"><input id="nm" placeholder="Nombre (ej. María)"><input id="dy" type="number" min="1" value="3" aria-label="Días de prueba"></div><input id="nt" placeholder="Teléfono o nota (ej. 986 000 000 · paga el 5)" maxlength="120" style="margin-top:8px"><button class="p" id="cr">Crear código</button></div>
 <div id="msg"></div>
 <div class="card" style="overflow-x:auto"><table><thead><tr><th>Cliente</th><th>Código</th><th>Estado</th><th>Disp.</th><th></th></tr></thead><tbody id="tb"></tbody></table><p id="vacio" hidden>Todavía no hay clientes.</p></div>
 <button id="out">Salir</button></div>
@@ -17,13 +17,14 @@ function load(){api({action:'list'}).then(function(d){
  $('login').hidden=true;$('app').hidden=false;$('vacio').hidden=d.items.length>0;
  $('tb').innerHTML=d.items.map(function(i){
   var est=i.active?i.estado:'inactivo',det=!i.activado?'sin activar · '+i.dias+' días':(i.estado==='vencido'?'terminó':'quedan '+i.dias+' d');
-  return '<tr><td>'+esc(i.name||'(sin nombre)')+'</td><td class="mono">'+esc(i.code)+'</td><td><span class="b '+est+'">'+est+'</span><br><small style="color:var(--tx2)">'+det+'</small></td><td>'+i.dispositivos+'/'+i.max+'</td><td class="acts">'
-  +'<button data-a="copy" data-c="'+esc(i.code)+'">Copiar</button><button data-a="extend" data-c="'+esc(i.code)+'">+30 días (pagó)</button><button data-a="reset" data-c="'+esc(i.code)+'">Reiniciar disp.</button><button data-a="toggle" data-c="'+esc(i.code)+'">'+(i.active?'Desactivar':'Activar')+'</button><button data-a="delete" data-c="'+esc(i.code)+'">Borrar</button></td></tr>'}).join('')})}
+  return '<tr><td>'+esc(i.name||'(sin nombre)')+(i.note?'<br><small style="color:var(--tx2)">'+esc(i.note)+'</small>':'')+'</td><td class="mono">'+esc(i.code)+'</td><td><span class="b '+est+'">'+est+'</span><br><small style="color:var(--tx2)">'+det+'</small></td><td>'+i.dispositivos+'/'+i.max+'</td><td class="acts">'
+  +'<button data-a="copy" data-c="'+esc(i.code)+'">Copiar</button><button data-a="note" data-c="'+esc(i.code)+'" data-n="'+esc(i.note||'')+'">Nota</button><button data-a="extend" data-c="'+esc(i.code)+'">+30 días (pagó)</button><button data-a="reset" data-c="'+esc(i.code)+'">Reiniciar disp.</button><button data-a="toggle" data-c="'+esc(i.code)+'">'+(i.active?'Desactivar':'Activar')+'</button><button data-a="delete" data-c="'+esc(i.code)+'">Borrar</button></td></tr>'}).join('')})}
 $('in').onclick=function(){K=$('k').value;try{sessionStorage.setItem('ak',K)}catch(e){}$('err').textContent='';load()};
 $('k').onkeydown=function(e){if(e.key==='Enter')$('in').onclick()};
-$('cr').onclick=function(){api({action:'create',name:$('nm').value,days:$('dy').value}).then(function(d){if(d.ok){msg('Código creado: '+d.code+' (envíaselo a tu cliente)');$('nm').value='';load()}else msg(d.error,1)})};
+$('cr').onclick=function(){api({action:'create',name:$('nm').value,days:$('dy').value,note:$('nt').value}).then(function(d){if(d.ok){msg('Código creado: '+d.code+' (envíaselo a tu cliente)');$('nm').value='';$('nt').value='';load()}else msg(d.error,1)})};
 $('tb').onclick=function(e){var b=e.target.closest('button');if(!b)return;var a=b.dataset.a,c=b.dataset.c;
  if(a==='copy'){var t=location.origin+'/activar?c='+c;(navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(function(){msg('Enlace copiado: '+t)},function(){prompt('Copia este enlace:',t)});return}
+ if(a==='note'){var nv=prompt('Teléfono o nota de este cliente:',b.dataset.n||'');if(nv===null)return;api({action:'note',code:c,note:nv}).then(function(d){if(d.ok){msg('Nota guardada');load()}else msg(d.error,1)});return}
  if(a==='delete'&&!confirm('¿Borrar '+c+' para siempre?'))return;
  api({action:a,code:c,days:30}).then(function(d){if(d.ok){msg('Listo');load()}else msg(d.error,1)})};
 $('out').onclick=function(){K='';try{sessionStorage.removeItem('ak')}catch(e){}location.reload()};

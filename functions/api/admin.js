@@ -44,6 +44,7 @@ export async function onRequestPost({ request, env }) {
   } else if (a === 'toggle') rec.active = rec.active === false;
   else if (a === 'reset') rec.devices = [];
   else if (a === 'rename') { rec.name = String(b.name || '').slice(0, 60); }
+  else if (a === 'note') { rec.note = String(b.note || '').slice(0, 120); }
   else if (a === 'delete') { await env.CODES.delete('code:' + code); return json({ ok: true }); }
   else return json({ ok: false, error: 'Acción desconocida.' }, 400);
   await putCodigo(env, code, rec);
