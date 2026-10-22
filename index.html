@@ -72,6 +72,8 @@ label.chk input{width:18px;height:18px;padding:0}
 <div id="lock" role="dialog" aria-modal="true"><div class="lk"><div style="font-size:42px">🔒</div><h2>Mis finanzas</h2><p style="color:var(--tx2);margin:0">Ingresa tu PIN para continuar</p><input id="lkPin" type="password" inputmode="numeric" autocomplete="off" maxlength="8" placeholder="PIN" aria-label="PIN"><button class="p" id="lkGo">Entrar</button><div id="lkErr"></div><button id="lkForgot" style="border:0;background:none;color:var(--tx2);font-size:13px">Olvidé mi PIN</button></div></div>
 <main>
 <div class="top"><h1>Mis finanzas</h1><input type="month" id="mes" aria-label="Mes"><div style="display:flex;gap:6px;flex-wrap:wrap"><button id="atras" disabled aria-label="Deshacer">↶ Atrás</button><button id="adelante" disabled aria-label="Rehacer">Adelante ↷</button><button id="opt" aria-expanded="false" aria-controls="opts">Opciones ▾</button></div></div>
+<div class="card" id="movBox" hidden><h2>Ya hay una dirección nueva</h2><p style="margin:0 0 10px;color:var(--tx2);font-size:14px">Esta dirección dejará de usarse. Toca el botón y tus datos pasan solos a la dirección nueva.</p><button class="p" id="movBtn">Mover mis datos a la nueva dirección</button></div>
+<div class="card" id="migBox" hidden><h2>Importar datos de tu app anterior</h2><p id="migTxt" style="margin:0 0 10px;color:var(--tx2);font-size:14px"></p><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="p" id="migGo">Importar</button><button id="migNo">No, empezar vacío</button></div></div>
 <div class="card" id="opts" hidden>
 <details class="sec"><summary>Gastos por categoría</summary><div id="cats" style="margin-top:6px"></div></details>
 <details class="sec"><summary>Calculadora</summary><div style="margin-top:8px"><input id="calc" inputmode="decimal" placeholder="Ej. 120/3 o 25*4+10" style="width:100%"><div class="ops"><button type="button" onclick="ins('+','calc')">+</button><button type="button" onclick="ins('-','calc')">−</button><button type="button" onclick="ins('*','calc')">×</button><button type="button" onclick="ins('/','calc')">÷</button><button type="button" onclick="ins('(','calc')">(</button><button type="button" onclick="ins(')','calc')">)</button><button type="button" onclick="ins('<','calc')">⌫</button><button type="button" onclick="ins('C','calc')">C</button></div>
@@ -243,6 +245,34 @@ $('pinOff').onclick=function(){var d=pinData(),e=$('secErr');e.style.color='var(
 $('lockNow').onclick=lock;
 document.addEventListener('visibilitychange',function(){if(document.hidden){hiddenAt=Date.now()}else if(hasPin()&&hiddenAt&&Date.now()-hiddenAt>30000){lock()}});
 secUI();if(hasPin())lock();
+var MOVE_TO='';
+function b64u(b){var s='';for(var i=0;i<b.length;i++)s+=String.fromCharCode(b[i]);return btoa(s).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'')}
+function unb64u(s){s=s.replace(/-/g,'+').replace(/_/g,'/');while(s.length%4)s+='=';var b=atob(s),a=new Uint8Array(b.length);for(var i=0;i<b.length;i++)a[i]=b.charCodeAt(i);return a}
+function gzipB(bytes,dec){return Promise.resolve().then(function(){var cs=new (dec?DecompressionStream:CompressionStream)('gzip'),w=cs.writable.getWriter();w.write(bytes);w.close();return new Response(cs.readable).arrayBuffer()}).then(function(b){return new Uint8Array(b)})}
+function packData(){var bytes=new TextEncoder().encode(JSON.stringify({v:1,S:S}));
+ if(window.CompressionStream)return gzipB(bytes).then(function(o){return 'g.'+b64u(o)},function(){return 'p.'+b64u(bytes)});
+ return Promise.resolve('p.'+b64u(bytes))}
+function unpackData(str){return Promise.resolve().then(function(){var t=str.slice(0,2),b=unb64u(str.slice(2));return t==='g.'?gzipB(b,true):b}).then(function(o){return JSON.parse(new TextDecoder().decode(o))})}
+function cleanData(d){
+ if(!d||d.v!==1||!d.S||!Array.isArray(d.S.items))throw new Error('formato');
+ var D=/^\d{4}-\d{2}-\d{2}$/,M=/^\d{4}-\d{2}$/,T={ingreso:1,gasto:1,pendiente:1};
+ var num=function(x){x=Number(x);return isFinite(x)&&x>=0&&x<1e9?x:null};
+ var items=[];d.S.items.slice(0,5000).forEach(function(i){if(!i||!T[i.type]||!D.test(String(i.date)))return;var a=num(i.amount);if(a===null)return;
+  var o={id:(typeof i.id==='number'||typeof i.id==='string')?i.id:Date.now()+Math.random(),type:i.type,desc:String(i.desc||'').slice(0,200),amount:a,cat:String(i.cat||'Otros').slice(0,40),date:String(i.date)};if(i.fid)o.fid=String(i.fid).slice(0,40);items.push(o)});
+ var fixed=[];(Array.isArray(d.S.fixed)?d.S.fixed:[]).slice(0,500).forEach(function(f){if(!f||!M.test(String(f.start)))return;var a=num(f.amount),dy=parseInt(f.day,10);if(a===null||!(dy>=1&&dy<=31))return;fixed.push({id:String(f.id||'f'+Date.now()).slice(0,40),desc:String(f.desc||'').slice(0,200),amount:a,cat:String(f.cat||'Otros').slice(0,40),day:dy,start:String(f.start)})});
+ var skip=(Array.isArray(d.S.skip)?d.S.skip:[]).slice(0,5000).map(function(x){return String(x).slice(0,60)});
+ return {items:items,goal:num(d.S.goal)||0,fixed:fixed,skip:skip}}
+function moveOk(){try{return !!MOVE_TO&&new URL(MOVE_TO).origin!==location.origin}catch(e){return false}}
+$('movBtn').onclick=function(){packData().then(function(p){if(p.length>60000){toast('Tienes muchos datos para moverlos con un toque. Usa Descargar copia e Importar copia.',1);return}
+ location.href=MOVE_TO.replace(/\/+$/,'')+'/#migrar='+p})};
+var migPayload=null;
+function checkMig(){var h=location.hash;if(h.indexOf('#migrar=')!==0)return;var raw=h.slice(8);
+ try{history.replaceState(null,'',location.pathname+location.search)}catch(e){}
+ unpackData(raw).then(function(d){var c=cleanData(d);migPayload=c;
+  $('migTxt').textContent='Encontramos los datos de tu app anterior: '+c.items.length+' registros. '+((S.items.length||S.fixed.length)?'Importarlos reemplazará lo que ya tienes aquí. ':'')+'¿Quieres importarlos?';
+  $('migBox').hidden=false;try{$('migBox').scrollIntoView({block:'start'})}catch(e){}}).catch(function(){toast('No se pudieron leer los datos del enlace.',1)})}
+$('migGo').onclick=function(){if(!migPayload)return;S=Object.assign({items:[],goal:0,fixed:[],skip:[]},migPayload);migPayload=null;save();$('migBox').hidden=true;render();toast('✓ Datos importados')};
+$('migNo').onclick=function(){migPayload=null;$('migBox').hidden=true};
 $('opt').onclick=function(){var o=$('opts'),h=o.hidden;o.hidden=!h;this.setAttribute('aria-expanded',String(h));this.textContent=h?'Opciones ▴':'Opciones ▾'};
 $('mes').onchange=render;
 $('meta').oninput=function(){S.goal=parseFloat(this.value)||0;save('goal');render()};
@@ -268,6 +298,7 @@ $('imp').onchange=function(){var f=this.files[0];if(!f)return;var r=new FileRead
 var l=lsGet();if(l&&l.items){S=Object.assign({goal:0,fixed:[],skip:[]},l)}last=JSON.stringify(S);
 render();
 $('est').textContent='Tus datos se guardan en este dispositivo. Usa Descargar copia para respaldarlos.';
+checkMig();if(moveOk())$('movBox').hidden=false;
 </script>
 </body>
 </html>
