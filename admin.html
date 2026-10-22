@@ -1,0 +1,31 @@
+<!DOCTYPE html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Administrador</title><meta name="theme-color" content="#000000"><meta name="robots" content="noindex,nofollow"><style>:root{color-scheme:dark;--bg:#000;--card:#101010;--tx:#f2f2f2;--tx2:#9a9a9a;--bd:#2a2a2a;--ac:#85B7EB;--ok:#97C459;--bad:#F09595;--warn:#FAC775}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}main{max-width:460px;margin:0 auto;padding:24px 16px}.card{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:16px;margin-bottom:12px}h1{font-size:22px;margin:8px 0}p{color:var(--tx2);margin:6px 0 12px}input,button{font:inherit;border-radius:10px;border:1px solid var(--bd);background:#000;color:var(--tx);padding:12px;width:100%}button{cursor:pointer;margin-top:8px}button.p{background:var(--ac);color:#000;border:0;font-weight:700}#err{color:var(--bad);min-height:20px;margin-top:8px;font-size:14px}</style><style>main{max-width:760px}table{width:100%;border-collapse:collapse;font-size:14px}td,th{padding:8px 6px;border-bottom:1px solid var(--bd);text-align:left;vertical-align:top}.b{display:inline-block;padding:2px 8px;border-radius:99px;font-size:12px}.prueba{background:#412402;color:var(--warn)}.pago{background:#27500A;color:var(--ok)}.vencido,.inactivo{background:#501313;color:var(--bad)}.acts button{width:auto;margin:2px 4px 2px 0;padding:6px 10px;font-size:13px}.row{display:flex;gap:8px;flex-wrap:wrap}.row>*{flex:1;min-width:120px}.mono{font-family:ui-monospace,Menlo,Consolas,monospace;letter-spacing:1px}#msg{min-height:20px;margin:8px 0;font-size:14px}</style></head><body><main>
+<h1>Administrador</h1>
+<div class="card" id="login"><p style="margin-top:0">Clave de administrador</p><input id="k" type="password" autocomplete="off"><button class="p" id="in">Entrar</button><div id="err"></div></div>
+<div id="app" hidden>
+<div class="card"><b>Nuevo cliente</b><div class="row" style="margin-top:8px"><input id="nm" placeholder="Nombre (ej. María)"><input id="dy" type="number" min="1" value="3" aria-label="Días de prueba"></div><button class="p" id="cr">Crear código</button></div>
+<div id="msg"></div>
+<div class="card" style="overflow-x:auto"><table><thead><tr><th>Cliente</th><th>Código</th><th>Estado</th><th>Disp.</th><th></th></tr></thead><tbody id="tb"></tbody></table><p id="vacio" hidden>Todavía no hay clientes.</p></div>
+<button id="out">Salir</button></div>
+</main><script>
+var $=function(i){return document.getElementById(i)},K='';
+try{K=sessionStorage.getItem('ak')||''}catch(e){}
+function api(b){return fetch('/api/admin',{method:'POST',headers:{'Content-Type':'application/json','x-admin-key':K},body:JSON.stringify(b)}).then(function(r){return r.json()})}
+function esc(s){return String(s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+function msg(t,bad){var m=$('msg');m.textContent=t;m.style.color=bad?'var(--bad)':'var(--ok)'}
+function load(){api({action:'list'}).then(function(d){
+ if(!d.ok){K='';try{sessionStorage.removeItem('ak')}catch(e){}$('app').hidden=true;$('login').hidden=false;$('err').textContent=d.error||'Error';return}
+ $('login').hidden=true;$('app').hidden=false;$('vacio').hidden=d.items.length>0;
+ $('tb').innerHTML=d.items.map(function(i){
+  var est=i.active?i.estado:'inactivo',det=!i.activado?'sin activar · '+i.dias+' días':(i.estado==='vencido'?'terminó':'quedan '+i.dias+' d');
+  return '<tr><td>'+esc(i.name||'(sin nombre)')+'</td><td class="mono">'+esc(i.code)+'</td><td><span class="b '+est+'">'+est+'</span><br><small style="color:var(--tx2)">'+det+'</small></td><td>'+i.dispositivos+'/'+i.max+'</td><td class="acts">'
+  +'<button data-a="copy" data-c="'+esc(i.code)+'">Copiar</button><button data-a="extend" data-c="'+esc(i.code)+'">+30 días (pagó)</button><button data-a="reset" data-c="'+esc(i.code)+'">Reiniciar disp.</button><button data-a="toggle" data-c="'+esc(i.code)+'">'+(i.active?'Desactivar':'Activar')+'</button><button data-a="delete" data-c="'+esc(i.code)+'">Borrar</button></td></tr>'}).join('')})}
+$('in').onclick=function(){K=$('k').value;try{sessionStorage.setItem('ak',K)}catch(e){}$('err').textContent='';load()};
+$('k').onkeydown=function(e){if(e.key==='Enter')$('in').onclick()};
+$('cr').onclick=function(){api({action:'create',name:$('nm').value,days:$('dy').value}).then(function(d){if(d.ok){msg('Código creado: '+d.code+' (envíaselo a tu cliente)');$('nm').value='';load()}else msg(d.error,1)})};
+$('tb').onclick=function(e){var b=e.target.closest('button');if(!b)return;var a=b.dataset.a,c=b.dataset.c;
+ if(a==='copy'){var t=location.origin+'/activar?c='+c;(navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(function(){msg('Enlace copiado: '+t)},function(){prompt('Copia este enlace:',t)});return}
+ if(a==='delete'&&!confirm('¿Borrar '+c+' para siempre?'))return;
+ api({action:a,code:c,days:30}).then(function(d){if(d.ok){msg('Listo');load()}else msg(d.error,1)})};
+$('out').onclick=function(){K='';try{sessionStorage.removeItem('ak')}catch(e){}location.reload()};
+if(K)load();
+</script></body></html>

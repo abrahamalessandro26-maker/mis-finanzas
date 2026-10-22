@@ -1,0 +1,17 @@
+<!DOCTYPE html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Activar acceso</title><meta name="theme-color" content="#000000"><meta name="robots" content="noindex"><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon-192.png"><link rel="apple-touch-icon" href="apple-touch-icon.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Mis finanzas"><style>:root{color-scheme:dark;--bg:#000;--card:#101010;--tx:#f2f2f2;--tx2:#9a9a9a;--bd:#2a2a2a;--ac:#85B7EB;--ok:#97C459;--bad:#F09595;--warn:#FAC775}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}main{max-width:460px;margin:0 auto;padding:24px 16px}.card{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:16px;margin-bottom:12px}h1{font-size:22px;margin:8px 0}p{color:var(--tx2);margin:6px 0 12px}input,button{font:inherit;border-radius:10px;border:1px solid var(--bd);background:#000;color:var(--tx);padding:12px;width:100%}button{cursor:pointer;margin-top:8px}button.p{background:var(--ac);color:#000;border:0;font-weight:700}#err{color:var(--bad);min-height:20px;margin-top:8px;font-size:14px}</style></head><body><main>
+<div style="font-size:42px;text-align:center">💰</div><h1 style="text-align:center">Mis finanzas</h1><p style="text-align:center">Escribe tu código de acceso para entrar.</p>
+<div class="card"><input id="c" placeholder="XXXX-XXXX" autocomplete="off" autocapitalize="characters" maxlength="9" style="text-align:center;letter-spacing:3px;font-size:20px"><button class="p" id="go">Entrar</button><div id="err"></div></div>
+<p style="text-align:center;font-size:13px">¿No tienes código? Pídelo a quien te compartió la app.</p>
+</main><script>
+var $=function(i){return document.getElementById(i)};
+try{if(location.hash.indexOf('#migrar=')===0)sessionStorage.setItem('mig',location.hash)}catch(e){}
+var q=new URLSearchParams(location.search).get('c');if(q)$('c').value=q;
+$('c').oninput=function(){var v=this.value.toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,8);this.value=v.length>4?v.slice(0,4)+'-'+v.slice(4):v};
+function go(){var b=$('go');b.disabled=true;$('err').textContent='';
+ fetch('/api/activar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({code:$('c').value})})
+ .then(function(r){return r.json()}).then(function(d){
+  if(d.ok){var h='';try{h=sessionStorage.getItem('mig')||'';sessionStorage.removeItem('mig')}catch(e){}location.replace('/'+h)}
+  else{$('err').textContent=d.error||'No se pudo activar.';b.disabled=false}})
+ .catch(function(){$('err').textContent='Sin conexión. Intenta de nuevo.';b.disabled=false})}
+$('go').onclick=go;$('c').onkeydown=function(e){if(e.key==='Enter')go()};
+</script></body></html>

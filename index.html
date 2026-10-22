@@ -71,11 +71,13 @@ label.chk input{width:18px;height:18px;padding:0}
 <body>
 <div id="lock" role="dialog" aria-modal="true"><div class="lk"><div style="font-size:42px">🔒</div><h2>Mis finanzas</h2><p style="color:var(--tx2);margin:0">Ingresa tu PIN para continuar</p><input id="lkPin" type="password" inputmode="numeric" autocomplete="off" maxlength="8" placeholder="PIN" aria-label="PIN"><button class="p" id="lkGo">Entrar</button><div id="lkErr"></div><button id="lkForgot" style="border:0;background:none;color:var(--tx2);font-size:13px">Olvidé mi PIN</button></div></div>
 <main>
+<div id="lic" hidden style="border-radius:10px;padding:10px 12px;margin-bottom:12px;font-size:14px"></div>
 <div class="top"><h1>Mis finanzas</h1><input type="month" id="mes" aria-label="Mes"><div style="display:flex;gap:6px;flex-wrap:wrap"><button id="atras" disabled aria-label="Deshacer">↶ Atrás</button><button id="adelante" disabled aria-label="Rehacer">Adelante ↷</button><button id="opt" aria-expanded="false" aria-controls="opts">Opciones ▾</button></div></div>
-<div class="card" id="movBox" hidden><h2>Ya hay una dirección nueva</h2><p style="margin:0 0 10px;color:var(--tx2);font-size:14px">Esta dirección dejará de usarse. Toca el botón y tus datos pasan solos a la dirección nueva.</p><button class="p" id="movBtn">Mover mis datos a la nueva dirección</button></div>
+<div class="card" id="movBox" hidden><h2>Ya hay una dirección nueva</h2><p style="margin:0 0 10px;color:var(--tx2);font-size:14px">Esta dirección dejará de usarse. Toca el botón y tus datos pasan solos a la dirección nueva.</p><button class="p" id="movBtn">Mover mis datos a la nueva dirección</button><button id="movCopy" style="margin-top:8px">Copiar enlace (si el botón no funciona)</button><p style="margin:8px 0 0;color:var(--tx2);font-size:12px">En iPhone: primero instala la app nueva en tu pantalla de inicio, ábrela, entra con tu código y ahí usa Opciones &gt; Importar datos de mi app anterior pegando este enlace.</p></div>
 <div class="card" id="migBox" hidden><h2>Importar datos de tu app anterior</h2><p id="migTxt" style="margin:0 0 10px;color:var(--tx2);font-size:14px"></p><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="p" id="migGo">Importar</button><button id="migNo">No, empezar vacío</button></div></div>
 <div class="card" id="opts" hidden>
 <details class="sec"><summary>Gastos por categoría</summary><div id="cats" style="margin-top:6px"></div></details>
+<details class="sec"><summary>Importar datos de mi app anterior</summary><div style="margin-top:8px"><input id="pasteMig" placeholder="Pega aquí el enlace copiado" autocomplete="off" style="width:100%"><button id="pasteGo" style="margin-top:8px">Importar</button></div></details>
 <details class="sec"><summary>Calculadora</summary><div style="margin-top:8px"><input id="calc" inputmode="decimal" placeholder="Ej. 120/3 o 25*4+10" style="width:100%"><div class="ops"><button type="button" onclick="ins('+','calc')">+</button><button type="button" onclick="ins('-','calc')">−</button><button type="button" onclick="ins('*','calc')">×</button><button type="button" onclick="ins('/','calc')">÷</button><button type="button" onclick="ins('(','calc')">(</button><button type="button" onclick="ins(')','calc')">)</button><button type="button" onclick="ins('<','calc')">⌫</button><button type="button" onclick="ins('C','calc')">C</button></div>
 <div id="calcOut" style="font-size:20px;font-weight:600;margin-top:8px"></div><button type="button" class="p" style="margin-top:8px" onclick="usar()">Usar resultado en el monto</button></div></details>
 </div>
@@ -245,7 +247,7 @@ $('pinOff').onclick=function(){var d=pinData(),e=$('secErr');e.style.color='var(
 $('lockNow').onclick=lock;
 document.addEventListener('visibilitychange',function(){if(document.hidden){hiddenAt=Date.now()}else if(hasPin()&&hiddenAt&&Date.now()-hiddenAt>30000){lock()}});
 secUI();if(hasPin())lock();
-var MOVE_TO='';
+var MOVE_TO='https://finanzasevan.com',MOVE_ON=false;
 function b64u(b){var s='';for(var i=0;i<b.length;i++)s+=String.fromCharCode(b[i]);return btoa(s).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'')}
 function unb64u(s){s=s.replace(/-/g,'+').replace(/_/g,'/');while(s.length%4)s+='=';var b=atob(s),a=new Uint8Array(b.length);for(var i=0;i<b.length;i++)a[i]=b.charCodeAt(i);return a}
 function gzipB(bytes,dec){return Promise.resolve().then(function(){var cs=new (dec?DecompressionStream:CompressionStream)('gzip'),w=cs.writable.getWriter();w.write(bytes);w.close();return new Response(cs.readable).arrayBuffer()}).then(function(b){return new Uint8Array(b)})}
@@ -262,15 +264,19 @@ function cleanData(d){
  var fixed=[];(Array.isArray(d.S.fixed)?d.S.fixed:[]).slice(0,500).forEach(function(f){if(!f||!M.test(String(f.start)))return;var a=num(f.amount),dy=parseInt(f.day,10);if(a===null||!(dy>=1&&dy<=31))return;fixed.push({id:String(f.id||'f'+Date.now()).slice(0,40),desc:String(f.desc||'').slice(0,200),amount:a,cat:String(f.cat||'Otros').slice(0,40),day:dy,start:String(f.start)})});
  var skip=(Array.isArray(d.S.skip)?d.S.skip:[]).slice(0,5000).map(function(x){return String(x).slice(0,60)});
  return {items:items,goal:num(d.S.goal)||0,fixed:fixed,skip:skip}}
-function moveOk(){try{return !!MOVE_TO&&new URL(MOVE_TO).origin!==location.origin}catch(e){return false}}
+function moveOk(){try{return !!MOVE_TO&&(MOVE_ON||/[?&]mudanza=1/.test(location.search))&&new URL(MOVE_TO).origin!==location.origin}catch(e){return false}}
 $('movBtn').onclick=function(){packData().then(function(p){if(p.length>60000){toast('Tienes muchos datos para moverlos con un toque. Usa Descargar copia e Importar copia.',1);return}
  location.href=MOVE_TO.replace(/\/+$/,'')+'/#migrar='+p})};
+$('movCopy').onclick=function(){packData().then(function(p){var u=MOVE_TO.replace(/\/+$/,'')+'/#migrar='+p;
+ (navigator.clipboard?navigator.clipboard.writeText(u):Promise.reject()).then(function(){toast('✓ Enlace copiado')},function(){prompt('Copia este enlace:',u)})})};
 var migPayload=null;
+function mostrarMig(raw){unpackData(raw).then(function(d){var c=cleanData(d);migPayload=c;
+  $('migTxt').textContent='Encontramos los datos de tu app anterior: '+c.items.length+' registros. '+((S.items.length||S.fixed.length)?'Importarlos reemplazará lo que ya tienes aquí. ':'')+'¿Quieres importarlos?';
+  $('migBox').hidden=false;try{$('migBox').scrollIntoView({block:'start'})}catch(e){}}).catch(function(){toast('No se pudieron leer los datos.',1)})}
+$('pasteGo').onclick=function(){var v=$('pasteMig').value.trim(),i=v.indexOf('#migrar=');if(i>=0)v=v.slice(i+8);if(!/^[gp]\.[A-Za-z0-9_-]+$/.test(v)){toast('El enlace no es válido.',1);return}$('opts').hidden=true;mostrarMig(v)};
 function checkMig(){var h=location.hash;if(h.indexOf('#migrar=')!==0)return;var raw=h.slice(8);
  try{history.replaceState(null,'',location.pathname+location.search)}catch(e){}
- unpackData(raw).then(function(d){var c=cleanData(d);migPayload=c;
-  $('migTxt').textContent='Encontramos los datos de tu app anterior: '+c.items.length+' registros. '+((S.items.length||S.fixed.length)?'Importarlos reemplazará lo que ya tienes aquí. ':'')+'¿Quieres importarlos?';
-  $('migBox').hidden=false;try{$('migBox').scrollIntoView({block:'start'})}catch(e){}}).catch(function(){toast('No se pudieron leer los datos del enlace.',1)})}
+ mostrarMig(raw)}
 $('migGo').onclick=function(){if(!migPayload)return;S=Object.assign({items:[],goal:0,fixed:[],skip:[]},migPayload);migPayload=null;save();$('migBox').hidden=true;render();toast('✓ Datos importados')};
 $('migNo').onclick=function(){migPayload=null;$('migBox').hidden=true};
 $('opt').onclick=function(){var o=$('opts'),h=o.hidden;o.hidden=!h;this.setAttribute('aria-expanded',String(h));this.textContent=h?'Opciones ▴':'Opciones ▾'};
@@ -299,6 +305,13 @@ var l=lsGet();if(l&&l.items){S=Object.assign({goal:0,fixed:[],skip:[]},l)}last=J
 render();
 $('est').textContent='Tus datos se guardan en este dispositivo. Usa Descargar copia para respaldarlos.';
 checkMig();if(moveOk())$('movBox').hidden=false;
+
+(function(){fetch('/api/estado',{credentials:'same-origin'}).then(function(r){var ct=r.headers.get('content-type')||'';if(ct.indexOf('json')<0)return null;return r.json()}).then(function(d){
+ if(!d)return;if(d.estado==='vencido'||d.estado==='inactivo'){location.reload();return}
+ var el=$('lic'),n=d.dias;if(d.estado==='prueba'){el.hidden=false;el.style.background=n<=2?'var(--badbg)':'var(--warnbg)';el.style.color=n<=2?'var(--bad)':'var(--warn)';
+  el.textContent=n<=2?'⏰ Tu prueba termina '+(n<=1?'hoy o mañana':'en '+n+' días')+'. Contacta a quien te compartió la app para activar tu plan.':'🎁 Prueba gratis: te quedan '+n+' días.'}
+ else if(d.estado==='pago'&&n<=3){el.hidden=false;el.style.background='var(--warnbg)';el.style.color='var(--warn)';el.textContent='Tu plan vence en '+n+(n===1?' día':' días')+'. Contacta para renovarlo.'}
+}).catch(function(){})})();
 </script>
 </body>
 </html>
