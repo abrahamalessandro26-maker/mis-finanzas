@@ -3,7 +3,7 @@
 App web para controlar ingresos, gastos, pagos pendientes y ahorro. Es un solo archivo (`index.html`), sin instalar nada ni base de datos.
 
 - Los datos se guardan en el **navegador de cada persona** (localStorage), solo en ese dispositivo.
-- Incluye gastos fijos mensuales, gráficos, calculadora, deshacer/rehacer y copia de respaldo (exportar/importar JSON).
+- Incluye gastos por pagar, gráficos, calculadora, deshacer/rehacer y copia de respaldo (exportar/importar JSON).
 
 ## 1. Abrirlo en VS Code
 

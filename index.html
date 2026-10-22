@@ -58,22 +58,35 @@ label.btn{font:inherit;color:var(--tx);background:var(--card);border:1px solid v
 .bc small{color:var(--tx2);font-size:11px;margin-top:4px}
 .toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ok);color:#000;padding:10px 16px;border-radius:10px;font-weight:600;z-index:9;max-width:90%;opacity:0;pointer-events:none;transition:opacity .2s;text-align:center}.toast.on{opacity:1}.toast.bad{background:var(--bad)}
 .ops{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}.ops button{min-width:44px;font-size:18px;padding:8px 10px}
+.yel{color:#FACC15}
+.row{flex-wrap:wrap}.row>div:first-child{flex:1 1 140px;min-width:0}.acts{flex-wrap:wrap}
+.sec{border-top:1px solid var(--bd);padding:8px 0}.sec:first-of-type{border-top:0}
+.sec>summary{cursor:pointer;font-weight:600;font-size:15px}
+.sub{font-size:14px;font-weight:600;margin:16px 0 8px}
+label.lbl{display:flex;flex-direction:column;gap:2px;font-size:12px;color:var(--tx2)}
+label.chk{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--tx2)}
+label.chk input{width:18px;height:18px;padding:0}
 </style>
 </head>
 <body>
 <div id="lock" role="dialog" aria-modal="true"><div class="lk"><div style="font-size:42px">🔒</div><h2>Mis finanzas</h2><p style="color:var(--tx2);margin:0">Ingresa tu PIN para continuar</p><input id="lkPin" type="password" inputmode="numeric" autocomplete="off" maxlength="8" placeholder="PIN" aria-label="PIN"><button class="p" id="lkGo">Entrar</button><div id="lkErr"></div><button id="lkForgot" style="border:0;background:none;color:var(--tx2);font-size:13px">Olvidé mi PIN</button></div></div>
 <main>
-<div class="top"><h1>Mis finanzas</h1><input type="month" id="mes" aria-label="Mes"><div style="display:flex;gap:6px"><button id="atras" disabled aria-label="Deshacer">↶ Atrás</button><button id="adelante" disabled aria-label="Rehacer">Adelante ↷</button></div></div>
-<details class="card" open><summary style="cursor:pointer;font-weight:600">¿Cómo se usa?</summary><ol style="padding-left:18px;margin:10px 0 0;color:var(--tx2);font-size:14px"><li>Los cuadros de arriba (Ingresos, Gastado, Por pagar, Te sobra) se calculan solos. Tú no los escribes.</li><li>Para llenarlos usa Agregar movimiento: elige el tipo, escribe qué fue, el monto y toca Agregar.</li><li>Ingreso es dinero que recibes (sueldo, comisión). Gasto es algo que ya pagaste. Por pagar es una cuenta pendiente; cuando la pagues toca Pagado.</li><li>En Gastos fijos registra lo que se repite cada mes (alquiler, internet) y aparecerá solo como por pagar en cada mes.</li><li>En el monto puedes escribir operaciones: 25*4 multiplica, 120/3 divide, 50+30-10 suma y resta.</li></ol></details>
+<div class="top"><h1>Mis finanzas</h1><input type="month" id="mes" aria-label="Mes"><div style="display:flex;gap:6px;flex-wrap:wrap"><button id="atras" disabled aria-label="Deshacer">↶ Atrás</button><button id="adelante" disabled aria-label="Rehacer">Adelante ↷</button><button id="opt" aria-expanded="false" aria-controls="opts">Opciones ▾</button></div></div>
+<div class="card" id="opts" hidden>
+<details class="sec"><summary>Gastos por categoría</summary><div id="cats" style="margin-top:6px"></div></details>
+<details class="sec"><summary>Calculadora</summary><div style="margin-top:8px"><input id="calc" inputmode="decimal" placeholder="Ej. 120/3 o 25*4+10" style="width:100%"><div class="ops"><button type="button" onclick="ins('+','calc')">+</button><button type="button" onclick="ins('-','calc')">−</button><button type="button" onclick="ins('*','calc')">×</button><button type="button" onclick="ins('/','calc')">÷</button><button type="button" onclick="ins('(','calc')">(</button><button type="button" onclick="ins(')','calc')">)</button><button type="button" onclick="ins('<','calc')">⌫</button><button type="button" onclick="ins('C','calc')">C</button></div>
+<div id="calcOut" style="font-size:20px;font-weight:600;margin-top:8px"></div><button type="button" class="p" style="margin-top:8px" onclick="usar()">Usar resultado en el monto</button></div></details>
+</div>
+<details class="card" open><summary style="cursor:pointer;font-weight:600">¿Cómo se usa?</summary><ol style="padding-left:18px;margin:10px 0 0;color:var(--tx2);font-size:14px"><li>Los cuadros de arriba (Ingresos, Gastado, Por pagar, Te sobra) se calculan solos. Tú no los escribes.</li><li>En Agregar movimiento anota tus ingresos (sueldo, comisión) y tus gastos ya pagados.</li><li>En Gastos por pagar anota lo que todavía no pagas. No se descuenta de Te sobra hasta que toques Pagado; entonces pasa a Movimientos del mes como gasto.</li><li>En Opciones (arriba) tienes Gastos por categoría y la Calculadora.</li><li>En el monto puedes escribir operaciones: 25*4 multiplica, 120/3 divide, 50+30-10 suma y resta.</li></ol></details>
 <div id="alerta"></div>
 <div class="grid" id="res"></div>
 <div id="libre" style="color:var(--tx2);font-size:13px;margin:-4px 0 12px"></div>
 <div class="card"><h2>Meta de ahorro del mes</h2>
 <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><input type="number" id="meta" min="0" step="1" placeholder="Ej. 300" style="width:130px"><span id="metaTxt" style="color:var(--tx2);font-size:14px"></span></div>
 <div class="bar"><i id="metaBar" style="width:0%"></i></div></div>
-<div class="card"><h2>Agregar movimiento</h2><p style='margin:0 0 10px;color:var(--tx2);font-size:13px'>Anota aquí cada ingreso, gasto o cuenta por pagar.</p>
+<div class="card"><h2>Agregar movimiento</h2><p style='margin:0 0 10px;color:var(--tx2);font-size:13px'>Anota aquí tus ingresos y tus gastos ya pagados. Las cuentas pendientes van en Gastos por pagar.</p>
 <div class="f">
-<select id="tipo"><option value="gasto">Gasto (ya pagado)</option><option value="pendiente">Por pagar</option><option value="ingreso">Ingreso</option></select>
+<select id="tipo"><option value="gasto">Gasto</option><option value="ingreso">Ingreso</option></select>
 <input id="desc" placeholder="Descripción">
 <input id="monto" inputmode="decimal" placeholder="Monto (ej. 25*4)">
 <select id="cat"><option>Comida</option><option>Transporte</option><option>Servicios</option><option>Vivienda</option><option>Salud</option><option>Ocio</option><option>Educación</option><option>Deudas</option><option>Otros</option></select>
@@ -82,21 +95,20 @@ label.btn{font:inherit;color:var(--tx);background:var(--card);border:1px solid v
 </div>
 <div class="ops"><button type="button" onclick="ins('+','monto')">+</button><button type="button" onclick="ins('-','monto')">−</button><button type="button" onclick="ins('*','monto')">×</button><button type="button" onclick="ins('/','monto')">÷</button><button type="button" onclick="ins('(','monto')">(</button><button type="button" onclick="ins(')','monto')">)</button><button type="button" onclick="ins('<','monto')">⌫</button><button type="button" onclick="ins('C','monto')">C</button></div>
 <div id="vista" style="color:var(--ac);font-size:13px;margin-top:6px"></div><div id="err" style="color:var(--bad);font-size:13px;margin-top:6px"></div></div>
-<div class="card"><h2>Gastos fijos mensuales</h2><p style='margin:0 0 10px;color:var(--tx2);font-size:13px'>Lo que pagas todos los meses. Se agrega solo como por pagar cada mes.</p>
-<div class="f"><input id="fdesc" placeholder="Ej. Alquiler"><input id="fmonto" inputmode="decimal" placeholder="Monto"><select id="fcat"></select><input id="fdia" type="number" min="1" max="31" placeholder="Día de pago"><button class="p" id="fadd">Agregar fijo</button></div>
-<div id="ferr" style="color:var(--bad);font-size:13px;margin:6px 0"></div><details id="fdet"><summary id="fsum" style="cursor:pointer;color:var(--ac);font-size:14px;margin:4px 0 8px"></summary><div id="flist" style="max-height:320px;overflow-y:auto"></div></details></div>
-<div class="card"><h2>Adónde va tu ingreso</h2><div class="dw"><div class="dona" id="dona"><span id="donaTx"></span></div><div class="lg" id="leyenda"></div></div></div>
-<div class="card"><h2>Últimos 6 meses</h2><div style="font-size:12px;color:var(--tx2);margin-bottom:8px"><span style="color:#97C459">■</span> Ingresos &nbsp; <span style="color:#F09595">■</span> Gastos (con lo por pagar)</div><div class="barras" id="barras"></div></div>
-<div class="card"><h2>Por pagar</h2><div id="pend"></div></div>
-<div class="card"><h2>Gastos por categoría</h2><div id="cats"></div></div>
+<div class="card"><h2>Gastos por pagar</h2><p style='margin:0 0 10px;color:var(--tx2);font-size:13px'>Cuentas que todavía no pagas. No se descuentan de Te sobra hasta que toques Pagado.</p>
+<div class="f"><input id="fdesc" placeholder="Descripción (ej. Alquiler)"><input id="fmonto" inputmode="decimal" placeholder="Monto (ej. 25*4)"><select id="fcat"></select><label class="lbl">Vence el<input id="ffecha" type="date"></label><button class="p" id="fadd">Agregar</button></div>
+<div id="ferr" style="color:var(--bad);font-size:13px;margin:6px 0"></div>
+<div id="pend"></div>
+<details id="fdet" style="margin-top:10px"><summary id="fsum" style="cursor:pointer;color:var(--ac);font-size:14px;margin:4px 0 8px"></summary><div id="flist" style="max-height:320px;overflow-y:auto"></div></details></div>
 <div class="card"><h2>Movimientos del mes</h2><div id="lista"></div></div>
-<div class="card"><h2>Calculadora</h2><input id="calc" inputmode="decimal" placeholder="Ej. 120/3 o 25*4+10" style="width:100%"><div class="ops"><button type="button" onclick="ins('+','calc')">+</button><button type="button" onclick="ins('-','calc')">−</button><button type="button" onclick="ins('*','calc')">×</button><button type="button" onclick="ins('/','calc')">÷</button><button type="button" onclick="ins('(','calc')">(</button><button type="button" onclick="ins(')','calc')">)</button><button type="button" onclick="ins('<','calc')">⌫</button><button type="button" onclick="ins('C','calc')">C</button></div>
-<div id="calcOut" style="font-size:20px;font-weight:600;margin-top:8px"></div><button type="button" class="p" style="margin-top:8px" onclick="usar()">Usar resultado en el monto</button></div>
 <div class="card"><h2>Seguridad</h2><p id="secTxt" style="margin:0 0 10px;color:var(--tx2);font-size:13px"></p>
 <div class="f" id="secOff"><input id="npin" type="password" inputmode="numeric" maxlength="8" placeholder="Nuevo PIN (4 a 8 números)"><input id="npin2" type="password" inputmode="numeric" maxlength="8" placeholder="Repite el PIN"><button class="p" id="pinOn">Activar PIN</button></div>
 <div class="f" id="secOn"><button id="lockNow">Bloquear ahora</button><input id="cpin" type="password" inputmode="numeric" maxlength="8" placeholder="PIN actual"><button id="pinOff">Quitar PIN</button></div>
 <div id="secErr" style="color:var(--bad);font-size:13px;margin-top:6px"></div></div>
-<div class="card"><h2>Corregir o empezar de cero</h2><p style='margin:0 0 10px;color:var(--tx2);font-size:13px'>Para borrar un solo movimiento usa el botón Borrar que aparece en cada línea de Movimientos del mes. Estos botones borran en bloque y piden confirmación. Si te equivocas, usa Atrás (arriba) para recuperar lo borrado.</p><div style="display:flex;gap:8px;flex-wrap:wrap"><button id="clrMes">Borrar movimientos de este mes</button><button id="clrAll" style="color:var(--bad);border-color:var(--bad)">Borrar todo y empezar de cero</button></div></div>
+<div class="card"><h2>Estadísticas</h2>
+<p class="sub" style="margin-top:0">Adónde va tu ingreso</p><div class="dw"><div class="dona" id="dona"><span id="donaTx"></span></div><div class="lg" id="leyenda"></div></div>
+<p class="sub">Últimos 6 meses</p><div style="font-size:12px;color:var(--tx2);margin-bottom:8px"><span style="color:#97C459">■</span> Ingresos &nbsp; <span style="color:#F09595">■</span> Gastos (con lo por pagar)</div><div class="barras" id="barras"></div></div>
+<div class="card"><h2>Corregir o empezar de cero</h2><p style='margin:0 0 10px;color:var(--tx2);font-size:13px'>Para borrar un solo movimiento usa el botón Borrar que aparece en cada línea de Movimientos del mes o de Gastos por pagar. Estos botones borran en bloque y piden confirmación. Si te equivocas, usa Atrás (arriba) para recuperar lo borrado.</p><div style="display:flex;gap:8px;flex-wrap:wrap"><button id="clrMes">Borrar movimientos de este mes</button><button id="clrAll" style="color:var(--bad);border-color:var(--bad)">Borrar todo y empezar de cero</button></div></div>
 <div style="display:flex;gap:8px;flex-wrap:wrap"><button id="exp">Descargar copia (JSON)</button><label class="btn" style="cursor:pointer"><input type="file" id="imp" accept=".json,application/json" hidden>Importar copia</label></div>
 <p id="est" style="color:var(--tx2);font-size:12px"></p>
 </main>
@@ -106,7 +118,7 @@ var S={items:[],goal:0,fixed:[],skip:[]},db=null,ref=null,uid=null,timer=null;
 var $=function(i){return document.getElementById(i)};
 var money=function(n){return 'S/ '+(Math.round(n*100)/100).toLocaleString('es-PE',{minimumFractionDigits:2,maximumFractionDigits:2})};
 var _n=new Date(),today=_n.getFullYear()+'-'+('0'+(_n.getMonth()+1)).slice(-2)+'-'+('0'+_n.getDate()).slice(-2);
-$('mes').value=today.slice(0,7);$('fecha').value=today;
+$('mes').value=today.slice(0,7);$('fecha').value=today;$('ffecha').value=today;
 function lsGet(){try{var r=localStorage.getItem('finanzas_v1');return r?JSON.parse(r):null}catch(e){return null}}
 var undo=[],redo=[],last='',lastKind='';
 function btns(){$('atras').disabled=!undo.length;$('adelante').disabled=!redo.length}
@@ -130,7 +142,7 @@ function render(){
  var sum=function(t){return its.filter(function(i){return i.type===t}).reduce(function(a,i){return a+i.amount},0)};
  var ing=sum('ingreso'),gas=sum('gasto'),pen=sum('pendiente'),sob=ing-gas,lib=ing-gas-pen;
  var r=$('res');r.textContent='';
- [['Ingresos',ing,'in'],['Gastado',gas,'out'],['Por pagar',pen,''],['Te sobra',sob,sob<0?'out':'in']].forEach(function(a){
+ [['Ingresos',ing,'in'],['Gastado',gas,'out'],['Por pagar',pen,'yel'],['Te sobra',sob,sob<0?'out':'in']].forEach(function(a){
   var d=el('div','m');d.appendChild(el('small',0,a[0]));var b=el('b',a[2],money(a[1]));d.appendChild(b);r.appendChild(d)});
  var al=$('alerta');al.textContent='';
  if(sob<0){var a=el('div','alert','Ojo: ya gastaste '+money(-sob)+' más de lo que te ingresó.');a.style.background='var(--badbg)';a.style.color='var(--bad)';al.appendChild(a)}
@@ -148,7 +160,7 @@ function render(){
   var late=i.date<today;l.appendChild(el('small',0,'Vence '+i.date+(late?' (vencido)':'')+' · '+i.cat));
   if(late)l.lastChild.style.color='var(--bad)';
   var ac=el('div','acts');ac.appendChild(el('b',0,money(i.amount)));
-  var pb=el('button',0,'Pagado');pb.onclick=function(){i.type='gasto';save();render()};ac.appendChild(pb);
+  var pb=el('button',0,'Pagado');pb.onclick=function(){i.type='gasto';save();render()};ac.appendChild(pb);var pd=el('button',0,'Borrar');pd.setAttribute('aria-label','Borrar gasto por pagar');pd.onclick=function(){if(i.fid)S.skip.push(i.fid+'|'+i.date.slice(0,7));S.items=S.items.filter(function(x){return x!==i});save();render()};ac.appendChild(pd);
   row.appendChild(l);row.appendChild(ac);p.appendChild(row)});more(p,pl,'P');
  var c=$('cats');c.textContent='';var by={};
  its.filter(function(i){return i.type!=='ingreso'}).forEach(function(i){by[i.cat]=(by[i.cat]||0)+i.amount});
@@ -157,10 +169,10 @@ function render(){
  keys.forEach(function(k){var w=el('div');var h=el('div','cat');h.appendChild(el('span',0,k));h.appendChild(el('span',0,money(by[k])+' · '+Math.round(by[k]/tot*100)+'%'));
   var bar=el('div','bar');var f=el('i');f.style.width=(by[k]/tot*100)+'%';bar.appendChild(f);w.appendChild(h);w.appendChild(bar);c.appendChild(w)});
  var L=$('lista');L.textContent='';
- if(!its.length)L.appendChild(el('div','empty','Agrega tu primer movimiento arriba.'));
- var ml=its.slice().sort(function(a,b){return a.date<b.date?1:-1});lim(ml,'L').forEach(function(i){
+ var mv=its.filter(function(i){return i.type!=='pendiente'});if(!mv.length)L.appendChild(el('div','empty','Aún no hay ingresos ni gastos este mes. Agrégalos arriba.'));
+ var ml=mv.slice().sort(function(a,b){return a.date<b.date?1:-1});lim(ml,'L').forEach(function(i){
   var row=el('div','row'),l=el('div');l.appendChild(el('div',0,i.desc));
-  var sm=el('small',0,i.date+' · '+i.cat+' ');if(i.type==='pendiente')sm.appendChild(el('span','tag','por pagar'));l.appendChild(sm);
+  var sm=el('small',0,i.date+' · '+i.cat+' ');l.appendChild(sm);
   var ac=el('div','acts'),amt=el('b',i.type==='ingreso'?'in':'out',(i.type==='ingreso'?'+ ':'- ')+money(i.amount));
   var del=el('button',0,'Borrar');del.setAttribute('aria-label','Borrar movimiento');
   del.onclick=function(){if(i.fid)S.skip.push(i.fid+'|'+i.date.slice(0,7));S.items=S.items.filter(function(x){return x!==i});save();render()};
@@ -175,9 +187,9 @@ function calc(s){s=String(s).replace(/s\/\.?/gi,'').replace(/soles?/gi,'').repla
  function fa(){if(s[p]==='-'){p++;return -fa()}if(s[p]==='+'){p++;return fa()}if(s[p]==='('){p++;var v=ex();if(s[p]!==')')return NaN;p++;return v}var q=/^\d+\.?\d*|^\.\d+/.exec(s.slice(p));if(!q)return NaN;p+=q[0].length;return parseFloat(q[0])}
  var r=ex();return p===s.length&&isFinite(r)?r:NaN}
 function ensureFixed(m){if(!m)return;var ch=false;S.fixed.forEach(function(f){if(m<f.start)return;if(S.skip.indexOf(f.id+'|'+m)>=0)return;if(S.items.some(function(i){return i.fid===f.id&&i.date.slice(0,7)===m}))return;var dd=Math.min(f.day,28);S.items.push({id:Date.now()+Math.random(),type:'pendiente',desc:f.desc,amount:f.amount,cat:f.cat,date:m+'-'+(dd<10?'0':'')+dd,fid:f.id});ch=true});if(ch)save('auto')}
-function fixedList(){var F=$('flist');F.textContent='';var n=S.fixed.length;$('fsum').textContent=n?'Ver mis gastos fijos ('+n+') · total '+money(S.fixed.reduce(function(a,f){return a+f.amount},0)):'Mis gastos fijos';if(!n)$('fdet').open=true;if(!S.fixed.length){F.appendChild(el('div','empty','Aún no tienes gastos fijos. Agrega alquiler, internet, suscripciones...'));return}
- S.fixed.forEach(function(f){var row=el('div','row'),l=el('div');l.appendChild(el('div',0,f.desc));l.appendChild(el('small',0,'Día '+f.day+' de cada mes · '+f.cat));var ac=el('div','acts');ac.appendChild(el('b',0,money(f.amount)));var b=el('button',0,'Quitar');b.onclick=function(){S.fixed=S.fixed.filter(function(x){return x!==f});S.items=S.items.filter(function(i){return !(i.fid===f.id&&i.type==='pendiente')});save();render()};ac.appendChild(b);row.appendChild(l);row.appendChild(ac);F.appendChild(row)});
- F.appendChild(el('div','empty','Total fijo al mes: '+money(S.fixed.reduce(function(a,f){return a+f.amount},0))))}
+function fixedList(){var F=$('flist');F.textContent='';var n=S.fixed.length;$('fdet').style.display=n?'':'none';if(!n)return;
+ $('fsum').textContent='Ver mis gastos que se repiten cada mes ('+n+') · total '+money(S.fixed.reduce(function(a,f){return a+f.amount},0));
+ S.fixed.forEach(function(f){var row=el('div','row'),l=el('div');l.appendChild(el('div',0,f.desc));l.appendChild(el('small',0,'Día '+f.day+' de cada mes · '+f.cat));var ac=el('div','acts');ac.appendChild(el('b',0,money(f.amount)));var b=el('button',0,'Quitar');b.onclick=function(){S.fixed=S.fixed.filter(function(x){return x!==f});S.items=S.items.filter(function(i){return !(i.fid===f.id&&i.type==='pendiente')});save();render()};ac.appendChild(b);row.appendChild(l);row.appendChild(ac);F.appendChild(row)})}
 function charts(ing,gas,pen,sob){var tot=Math.max(ing,gas+pen),D=$('dona'),lg=$('leyenda');lg.textContent='';
  var parts=[['Gastado',gas,'#E24B4A'],['Por pagar',pen,'#EF9F27'],['Libre tras pagar lo pendiente',Math.max(sob,0),'#639922']];
  parts.forEach(function(p){var d=el('div');var dot=el('i');dot.style.background=p[2];d.appendChild(dot);d.appendChild(el('span',0,p[0]+': '+money(p[1])));lg.appendChild(d)});
@@ -188,10 +200,12 @@ function charts(ing,gas,pen,sob){var tot=Math.max(ing,gas+pen),D=$('dona'),lg=$(
  var mx=Math.max.apply(null,data.map(function(d){return Math.max(d[1],d[2])}).concat([1]));
  data.forEach(function(d){var col=el('div','bc'),pair=el('div','pair'),h1=el('i'),h2=el('i');h1.style.background='#97C459';h2.style.background='#F09595';h1.style.height=(d[1]/mx*100)+'%';h2.style.height=(d[2]/mx*100)+'%';pair.appendChild(h1);pair.appendChild(h2);col.appendChild(pair);col.appendChild(el('small',0,N[+d[0].slice(5)-1]));B.appendChild(col)})}
 $('fcat').innerHTML=$('cat').innerHTML;
-$('fadd').onclick=function(){var d=$('fdesc').value.trim(),a=calc($('fmonto').value),dia=parseInt($('fdia').value,10);
- if(!d||!(a>0)||!(dia>=1&&dia<=31)){$('ferr').textContent='Completa descripción, monto y un día entre 1 y 31.';return}
- $('ferr').textContent='';S.fixed.push({id:'f'+Date.now(),desc:d,amount:a,cat:$('fcat').value,day:dia,start:$('mes').value||today.slice(0,7)});
- $('fdesc').value='';$('fmonto').value='';$('fdia').value='';save();render();$('fdet').open=true};
+$('fadd').onclick=function(){var d=$('fdesc').value.trim(),a=calc($('fmonto').value),f=$('ffecha').value||today;
+ if(!d)d=$('fcat').value;
+ if(!(a>0)){$('ferr').textContent='El monto no es válido. Escribe solo números u operaciones como 25*4.';return}
+ $('ferr').textContent='';
+ S.items.push({id:Date.now()+Math.random(),type:'pendiente',desc:d,amount:a,cat:$('fcat').value,date:f});
+ $('fdesc').value='';$('fmonto').value='';save();$('mes').value=f.slice(0,7);render();toast('✓ Agregado a Gastos por pagar')};
 $('monto').oninput=function(){var v=calc(this.value);$('vista').textContent=(/[+*\/x×÷(]|.-/.test(this.value)&&!isNaN(v))?'= '+money(v):''};
 $('calc').oninput=function(){var v=calc(this.value);$('calcOut').textContent=this.value.trim()===''?'':(isNaN(v)?'Escribe una operación con + - * /':'= '+(Math.round(v*100)/100).toLocaleString('es-PE',{maximumFractionDigits:2}))};
 function ins(t,id){var e=$(id||'monto');if(t==='C')e.value='';else if(t==='<')e.value=e.value.slice(0,-1);else e.value+=t;if(e.oninput)e.oninput()}
@@ -229,6 +243,7 @@ $('pinOff').onclick=function(){var d=pinData(),e=$('secErr');e.style.color='var(
 $('lockNow').onclick=lock;
 document.addEventListener('visibilitychange',function(){if(document.hidden){hiddenAt=Date.now()}else if(hasPin()&&hiddenAt&&Date.now()-hiddenAt>30000){lock()}});
 secUI();if(hasPin())lock();
+$('opt').onclick=function(){var o=$('opts'),h=o.hidden;o.hidden=!h;this.setAttribute('aria-expanded',String(h));this.textContent=h?'Opciones ▴':'Opciones ▾'};
 $('mes').onchange=render;
 $('meta').oninput=function(){S.goal=parseFloat(this.value)||0;save('goal');render()};
 $('add').onclick=function(){try{agregar()}catch(e){toast('Error: '+e.message,1)}};
