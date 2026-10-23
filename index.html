@@ -151,9 +151,14 @@ function render(){
   var d=el('div','m');d.appendChild(el('small',0,a[0]));var b=el('b',a[2],money(a[1]));d.appendChild(b);r.appendChild(d)});
  var al=$('alerta');al.textContent='';
  if(sob<0){var a=el('div','alert','Ojo: ya gastaste '+money(-sob)+' más de lo que te ingresó.');a.style.background='var(--badbg)';a.style.color='var(--bad)';al.appendChild(a)}
- else if(lib<0){var a1=el('div','alert','Cuando pagues todo lo pendiente te faltarían '+money(-lib)+'.');a1.style.background='var(--warnbg)';a1.style.color='var(--warn)';al.appendChild(a1)}
- else if(ing>0&&pen>0&&lib<ing*0.1){var a2=el('div','alert','Te queda poco margen: después de pagar lo pendiente tendrías solo '+money(lib)+'.');a2.style.background='var(--warnbg)';a2.style.color='var(--warn)';al.appendChild(a2)}
- $('libre').textContent=pen>0?'Lo por pagar no se descuenta hasta que toques Pagado. Si pagas todo lo pendiente te quedarían '+money(lib)+'.':'';
+ if(pen>0){var pls=its.filter(function(i){return i.type==='pendiente'}).sort(function(a,b){return a.date<b.date?-1:1}),n=pls.length;
+  var lines=['Tienes '+n+(n===1?' pago pendiente':' pagos pendientes')+' por '+money(pen)+'.'];
+  if(lib>=0)lines.push('💡 Si pagas todo, te sobrarían '+money(lib)+'.'+((ing>0&&lib<ing*0.1)?' Te queda poco margen.':''));
+  else{lines.push('⚠️ Si pagas todo, te faltarían '+money(-lib)+'.');
+   if(sob>0){var cum=0,k=0;for(var q=0;q<pls.length;q++){if(cum+pls[q].amount<=sob){cum+=pls[q].amount;k++}else break}
+    lines.push(k>0?'Con lo que te sobra ahora ('+money(sob)+') alcanzas a pagar '+k+' de '+n+' (por fecha de vencimiento): '+money(cum)+'.':'Con lo que te sobra ahora ('+money(sob)+') no alcanzas a pagar ni el primero.')}}
+  var ya=el('div','alert');lines.forEach(function(x,ix){var d=el('div',0,x);if(ix===1)d.style.fontWeight='600';ya.appendChild(d)});ya.style.background='var(--warnbg)';ya.style.color='var(--warn)';al.appendChild(ya)}
+ $('libre').textContent='';
  var g=S.goal||0,prog=g>0?Math.max(0,Math.min(100,sob/g*100)):0;
  $('metaBar').style.width=prog+'%';
  $('metaTxt').textContent=g>0?(sob>=g?'Meta alcanzada: te sobran '+money(sob):'Te faltan '+money(g-Math.max(sob,0))+' para tu meta'):'Define cuánto quieres ahorrar';
