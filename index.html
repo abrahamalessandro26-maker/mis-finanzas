@@ -71,6 +71,7 @@ label.chk input{width:18px;height:18px;padding:0}
 <body>
 <div id="lock" role="dialog" aria-modal="true"><div class="lk"><div style="font-size:42px">🔒</div><h2>Mis finanzas</h2><p style="color:var(--tx2);margin:0">Ingresa tu PIN para continuar</p><input id="lkPin" type="password" inputmode="numeric" autocomplete="off" maxlength="8" placeholder="PIN" aria-label="PIN"><button class="p" id="lkGo">Entrar</button><div id="lkErr"></div><button id="lkForgot" style="border:0;background:none;color:var(--tx2);font-size:13px">Olvidé mi PIN</button></div></div>
 <main>
+<div id="inst" hidden style="background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:10px 12px;margin-bottom:12px;font-size:14px"><div style="display:flex;gap:8px;align-items:center;justify-content:space-between;flex-wrap:wrap"><span>📲 Instala la app en tu pantalla de inicio para no perder tus datos.</span><span><button id="instVer" style="padding:6px 10px">Ver cómo</button> <button id="instNo" style="padding:6px 10px">Ahora no</button></span></div><div id="instSteps" hidden style="margin-top:10px;color:var(--tx2)"></div></div>
 <div id="lic" hidden style="border-radius:10px;padding:10px 12px;margin-bottom:12px;font-size:14px"></div>
 <div class="top"><h1>Mis finanzas</h1><input type="month" id="mes" aria-label="Mes"><div style="display:flex;gap:6px;flex-wrap:wrap"><button id="atras" disabled aria-label="Deshacer">↶ Atrás</button><button id="adelante" disabled aria-label="Rehacer">Adelante ↷</button><button id="opt" aria-expanded="false" aria-controls="opts">Opciones ▾</button></div></div>
 <div class="card" id="movBox" hidden><h2>Ya hay una dirección nueva</h2><p style="margin:0 0 10px;color:var(--tx2);font-size:14px">Esta dirección dejará de usarse. Toca el botón y tus datos pasan solos a la dirección nueva.</p><button class="p" id="movBtn">Mover mis datos a la nueva dirección</button><button id="movCopy" style="margin-top:8px">Copiar enlace (si el botón no funciona)</button><textarea id="movLink" hidden readonly rows="4" style="width:100%;margin-top:8px;background:#000;color:var(--tx);border:1px solid var(--bd);border-radius:10px;padding:8px;font-size:12px"></textarea><p style="margin:8px 0 0;color:var(--tx2);font-size:12px">En iPhone: primero instala la app nueva en tu pantalla de inicio, ábrela, entra con tu código y ahí usa Opciones &gt; Importar datos de mi app anterior pegando este enlace.</p></div>
@@ -318,6 +319,20 @@ checkMig();if(moveOk()){$('movBox').hidden=false;prepLink()}
   el.textContent=n<=2?'⏰ Tu prueba termina '+(n<=1?'hoy o mañana':'en '+n+' días')+'. Contacta a quien te compartió la app para activar tu plan.':'🎁 Prueba gratis: te quedan '+n+' días.'}
  else if(d.estado==='pago'&&n<=3){el.hidden=false;el.style.background='var(--warnbg)';el.style.color='var(--warn)';el.textContent='Tu plan vence en '+n+(n===1?' día':' días')+'. Contacta para renovarlo.'}
 }).catch(function(){})})();
+
+function instInfo(){var ua=navigator.userAgent,ios=/iPhone|iPad|iPod/.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1),and=/Android/.test(ua),
+ sa=false;try{sa=(window.matchMedia&&window.matchMedia('(display-mode: standalone)').matches)||navigator.standalone===true}catch(e){}
+ var inapp=/FBAN|FBAV|Instagram|TikTok|musical_ly|Line\/|Messenger|; wv\)/.test(ua);return {ios:ios,and:and,sa:sa,inapp:inapp,mobile:ios||and}}
+function instSteps(I){var h='';
+ if(I.inapp)h+='<p style="margin:0 0 8px;color:var(--warn)"><b>Estás dentro de otra app (WhatsApp, Instagram, Facebook...).</b> Primero ábrelo en el navegador: toca los tres puntitos y elige <b>'+(I.ios?'Abrir en Safari':'Abrir en Chrome')+'</b>.</p>';
+ if(I.ios)h+='<ol style="margin:0;padding-left:20px"><li>Usa <b>Safari</b>.</li><li>Toca el ícono <b>≡</b> (a la izquierda de la dirección) o el botón <b>Compartir</b>.</li><li>Elige <b>Agregar a pantalla de inicio</b> y toca <b>Agregar</b>.</li><li>Abre el ícono <b>Mis finanzas</b> y escribe tu código <b>ahí</b>, no aquí.</li></ol>';
+ else h+='<ol style="margin:0;padding-left:20px"><li>Usa <b>Chrome</b>.</li><li>Toca los <b>tres puntitos ⋮</b> (arriba a la derecha).</li><li>Elige <b>Instalar aplicación</b> o <b>Agregar a la pantalla de inicio</b> y confirma con <b>Instalar</b> o <b>Agregar</b>.</li><li>Abre el ícono <b>Mis finanzas</b> desde tu pantalla de inicio.</li></ol>';
+ return h}
+(function(){var I=instInfo();if(!I.mobile||I.sa)return;try{var u=parseInt(localStorage.getItem('inst_no')||'0',10);if(u&&Date.now()-u<6048e5)return}catch(e){}
+ if(!/finanzasevan|localhost/.test(location.hostname)&&!/[?&]inst=1/.test(location.search))return;
+ $('inst').hidden=false;$('instSteps').innerHTML=instSteps(I);
+ $('instVer').onclick=function(){var s=$('instSteps');s.hidden=!s.hidden};
+ $('instNo').onclick=function(){$('inst').hidden=true;try{localStorage.setItem('inst_no',String(Date.now()))}catch(e){}}})();
 </script>
 </body>
 </html>
