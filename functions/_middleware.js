@@ -2,7 +2,7 @@
 import { leerSesion, getCodigo, estadoDe } from '../lib/auth.js';
 
 const PUBLICOS = new Set([
-  '/activar', '/activar.html', '/vencido', '/vencido.html', '/admin', '/admin.html',
+  '/activar', '/activar.html', '/gusanito-demo', '/gusanito-demo.html', '/vencido', '/vencido.html', '/admin', '/admin.html',
   '/manifest.webmanifest', '/icon-192.png', '/icon-512.png', '/icon-maskable-512.png', '/apple-touch-icon.png', '/favicon.ico'
 ]);
 

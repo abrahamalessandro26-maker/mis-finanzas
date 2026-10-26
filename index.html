@@ -79,6 +79,7 @@ label.chk input{width:18px;height:18px;padding:0}
 <div class="card" id="opts" hidden>
 <details class="sec"><summary>Gastos por categoría</summary><div id="cats" style="margin-top:6px"></div></details>
 <details class="sec"><summary>Importar datos de mi app anterior</summary><div style="margin-top:8px"><input id="pasteMig" placeholder="Pega aquí el enlace copiado" autocomplete="off" style="width:100%"><button id="pasteGo" style="margin-top:8px">Importar</button></div></details>
+<details class="sec"><summary>🐍 Jugar al gusanito</summary><div style="margin-top:8px"><button type="button" class="p" id="gusGo">Abrir juego</button></div></details>
 <details class="sec"><summary>Calculadora</summary><div style="margin-top:8px"><input id="calc" inputmode="decimal" placeholder="Ej. 120/3 o 25*4+10" style="width:100%"><div class="ops"><button type="button" onclick="ins('+','calc')">+</button><button type="button" onclick="ins('-','calc')">−</button><button type="button" onclick="ins('*','calc')">×</button><button type="button" onclick="ins('/','calc')">÷</button><button type="button" onclick="ins('(','calc')">(</button><button type="button" onclick="ins(')','calc')">)</button><button type="button" onclick="ins('<','calc')">⌫</button><button type="button" onclick="ins('C','calc')">C</button></div>
 <div id="calcOut" style="font-size:20px;font-weight:600;margin-top:8px"></div><button type="button" class="p" style="margin-top:8px" onclick="usar()">Usar resultado en el monto</button></div></details>
 </div>
@@ -339,5 +340,7 @@ function instSteps(I){var h='';
  $('instVer').onclick=function(){var s=$('instSteps');s.hidden=!s.hidden};
  $('instNo').onclick=function(){$('inst').hidden=true;try{localStorage.setItem('inst_no',String(Date.now()))}catch(e){}}})();
 </script>
+<div id="gusBox" style="display:none;position:fixed;inset:0;z-index:100;background:#000;flex-direction:column"><div style="display:flex;justify-content:space-between;align-items:center;padding:calc(10px + env(safe-area-inset-top,0px)) 14px 10px"><b>🐍 Gusanito</b><button type="button" id="gusX" style="width:auto;padding:8px 16px">Cerrar</button></div><iframe id="gusF" title="Gusanito" style="flex:1;border:0;width:100%"></iframe></div>
+<script>(function(){var b=document.getElementById('gusBox'),f=document.getElementById('gusF');document.getElementById('gusGo').onclick=function(){f.src='gusanito.html';b.style.display='flex'};document.getElementById('gusX').onclick=function(){b.style.display='none';f.src='about:blank'}})();</script>
 </body>
 </html>

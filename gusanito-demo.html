@@ -1,0 +1,203 @@
+<title>El Gusanito</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&family=DM+Sans:wght@400;500;700&display=swap">
+<style>
+/* Concepto: pantalla de juego centrada, tablero cuadrado con HUD arriba y cruceta táctil abajo */
+:root{
+  --bg:#eef2e6;--panel:#dfe7d0;--grid:#cbd6b8;--ink:#1f2a17;--ink2:#56664a;
+  --snake:#2f6b2a;--snake-head:#1d4a1a;--food:#c8402f;--accent:#2f6b2a;--accent-ink:#f4f8ec;
+  --font-display:'Silkscreen','Courier New',monospace;--font-body:'DM Sans',system-ui,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#12170f;--panel:#1b2316;--grid:#252f1f;--ink:#e6efd9;--ink2:#93a384;
+  --snake:#7ed957;--snake-head:#b8f58f;--food:#ff6b57;--accent:#7ed957;--accent-ink:#12170f;color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#12170f;--panel:#1b2316;--grid:#252f1f;--ink:#e6efd9;--ink2:#93a384;
+  --snake:#7ed957;--snake-head:#b8f58f;--food:#ff6b57;--accent:#7ed957;--accent-ink:#12170f;color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--font-body);font-size:15px;
+  padding-block:20px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  display:flex;justify-content:center;min-height:100%}
+main{width:100%;max-width:440px;display:flex;flex-direction:column;gap:14px;min-width:0}
+header{display:flex;justify-content:space-between;align-items:flex-end;gap:12px}
+h1{font-family:var(--font-display);font-size:26px;line-height:1;margin:0;letter-spacing:.02em;text-wrap:balance}
+.hud{display:flex;gap:18px;font-family:var(--font-display);font-size:13px;color:var(--ink2);text-transform:uppercase;letter-spacing:.08em}
+.hud b{display:block;font-size:22px;color:var(--ink);font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:0}
+.board{position:relative;background:var(--panel);border-radius:6px;padding:8px}
+canvas{display:block;width:100%;aspect-ratio:1;touch-action:none;border-radius:3px;background:var(--panel)}
+.over{position:absolute;inset:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;
+  background:color-mix(in srgb,var(--bg) 82%,transparent);text-align:center;border-radius:3px;padding:16px}
+.over[hidden]{display:none!important}
+.over h2{font-family:var(--font-display);font-size:22px;margin:0}
+.over p{margin:0;color:var(--ink2)}
+button{font:inherit;cursor:pointer;border:0;border-radius:6px}
+button:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
+.primary{background:var(--accent);color:var(--accent-ink);font-family:var(--font-display);font-size:16px;padding:12px 22px;letter-spacing:.06em}
+.row{display:flex;gap:8px;flex-wrap:wrap}
+.chip{background:var(--panel);color:var(--ink);padding:9px 14px;font-weight:500;font-size:14px}
+.chip[aria-pressed="true"]{outline:2px solid var(--accent)}
+.pad{display:grid;grid-template-columns:repeat(3,64px);grid-template-rows:repeat(2,64px);gap:8px;justify-content:center}
+.pad button{background:var(--panel);color:var(--ink);font-size:24px;touch-action:manipulation}
+.pad button:active{background:var(--accent);color:var(--accent-ink)}
+.pad .u{grid-column:2;grid-row:1}.pad .l{grid-column:1;grid-row:2}.pad .d{grid-column:2;grid-row:2}.pad .r{grid-column:3;grid-row:2}
+.tip{color:var(--ink2);font-size:13px;margin:0;text-align:center}
+body.demo header,body.demo .row,body.demo .pad,body.demo .tip,body.demo .over{display:none!important}
+body.demo main{max-width:560px}
+body.demo{min-height:100vh;align-items:center}
+@media (hover:hover) and (pointer:fine){.pad{display:none}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<main>
+  <header>
+    <h1>El Gusanito</h1>
+    <div class="hud"><div>Puntos<b id="sc">0</b></div><div>Récord<b id="hi">0</b></div></div>
+  </header>
+
+  <div class="board">
+    <canvas id="cv" width="400" height="400" aria-label="Tablero del juego"></canvas>
+    <div class="over" id="ov">
+      <h2 id="ovT">Listo para jugar</h2>
+      <p id="ovP">Come las manzanas y no choques.</p>
+      <button class="primary" id="go">Jugar</button>
+    </div>
+  </div>
+
+  <div class="row">
+    <button class="chip" id="pause">Pausa</button>
+    <button class="chip" id="walls" aria-pressed="false">Paredes: mortales</button>
+  </div>
+
+  <div class="pad" aria-label="Controles">
+    <button class="u" data-d="u" aria-label="Arriba">▲</button>
+    <button class="l" data-d="l" aria-label="Izquierda">◀</button>
+    <button class="d" data-d="d" aria-label="Abajo">▼</button>
+    <button class="r" data-d="r" aria-label="Derecha">▶</button>
+  </div>
+  <p class="tip">Flechas o WASD para mover. Espacio para pausar. En el celular, desliza el dedo sobre el tablero.</p>
+</main>
+
+<script>
+(function(){
+  var DEMO=true, N=20, cv=document.getElementById('cv'), ctx=cv.getContext('2d');
+  var $=function(i){return document.getElementById(i)};
+  var sc=$('sc'),hi=$('hi'),ov=$('ov'),ovT=$('ovT'),ovP=$('ovP'),go=$('go'),pauseB=$('pause'),wallsB=$('walls');
+  var DIRS={u:[0,-1],d:[0,1],l:[-1,0],r:[1,0]};
+  var snake,dir,queue,food,score,state='ready',timer,wrap=false,best=0;
+  try{best=+localStorage.getItem('gusanito_best')||0}catch(e){}
+  hi.textContent=best;
+
+  function css(n){return getComputedStyle(document.documentElement).getPropertyValue(n).trim()}
+  function fit(){
+    var s=cv.getBoundingClientRect().width, r=window.devicePixelRatio||1;
+    cv.width=cv.height=Math.round(s*r); draw();
+  }
+  function reset(){
+    snake=[{x:10,y:10},{x:9,y:10},{x:8,y:10}]; dir='r'; queue=[]; score=0; sc.textContent=0; placeFood();
+  }
+  function placeFood(){
+    var free=[];
+    for(var x=0;x<N;x++)for(var y=0;y<N;y++){
+      if(!snake.some(function(s){return s.x===x&&s.y===y}))free.push({x:x,y:y});
+    }
+    food=free.length?free[Math.floor(Math.random()*free.length)]:null;
+  }
+  function speed(){return DEMO?85:Math.max(60,150-Math.floor(score/5)*8)}
+  function showOverlay(t,p,b){ovT.textContent=t;ovP.textContent=p;go.textContent=b;ov.hidden=false}
+  function start(){
+    reset(); state='playing'; ov.hidden=true; pauseB.textContent='Pausa'; clearTimeout(timer); loop(); draw();
+  }
+  function loop(){timer=setTimeout(function(){step();if(state==='playing')loop()},speed())}
+  function turn(d){
+    if(state==='ready'||state==='over'){return}
+    var last=queue.length?queue[queue.length-1]:dir, a=DIRS[last], b=DIRS[d];
+    if(a[0]+b[0]===0&&a[1]+b[1]===0)return;
+    if(d===last)return;
+    if(queue.length<2)queue.push(d);
+  }
+  function ai(){
+    var h=snake[0],best=null,bd=1e9,o=DIRS[dir];
+    ['u','d','l','r'].forEach(function(d){
+      var v=DIRS[d]; if(v[0]+o[0]===0&&v[1]+o[1]===0)return;
+      var nx=h.x+v[0],ny=h.y+v[1];
+      if(wrap){nx=(nx+N)%N;ny=(ny+N)%N}else if(nx<0||ny<0||nx>=N||ny>=N)return;
+      if(snake.slice(0,-1).some(function(s){return s.x===nx&&s.y===ny}))return;
+      var dist=food?Math.abs(nx-food.x)+Math.abs(ny-food.y):0;
+      if(dist<bd){bd=dist;best=d}
+    });
+    return best||dir;
+  }
+  function step(){
+    if(DEMO)dir=ai(); else if(queue.length)dir=queue.shift();
+    var h=snake[0], v=DIRS[dir], nx=h.x+v[0], ny=h.y+v[1];
+    if(wrap){nx=(nx+N)%N;ny=(ny+N)%N}
+    else if(nx<0||ny<0||nx>=N||ny>=N)return die();
+    var eating=food&&nx===food.x&&ny===food.y;
+    var body=eating?snake:snake.slice(0,-1);
+    if(body.some(function(s){return s.x===nx&&s.y===ny}))return die();
+    snake.unshift({x:nx,y:ny});
+    if(eating){
+      score++; sc.textContent=score; placeFood();
+      if(!DEMO&&score>best){best=score;hi.textContent=best;try{localStorage.setItem('gusanito_best',best)}catch(e){}}
+      if(!food){state='over';showOverlay('¡Ganaste!','Llenaste todo el tablero.','Jugar otra vez')}
+    }else snake.pop();
+    draw();
+  }
+  function die(){
+    state='over'; clearTimeout(timer); draw();
+    if(DEMO){setTimeout(start,700);return}
+    showOverlay('Fin del juego','Hiciste '+score+(score===1?' punto.':' puntos.'),'Jugar otra vez');
+  }
+  function togglePause(){
+    if(state==='playing'){state='paused';clearTimeout(timer);pauseB.textContent='Seguir';showOverlay('En pausa','Toca Seguir cuando estés listo.','Seguir')}
+    else if(state==='paused'){state='playing';ov.hidden=true;pauseB.textContent='Pausa';loop()}
+  }
+  function rr(x,y,w,h,r){ctx.beginPath();ctx.roundRect?ctx.roundRect(x,y,w,h,r):ctx.rect(x,y,w,h);ctx.fill()}
+  function draw(){
+    var W=cv.width, c=W/N;
+    ctx.fillStyle=css('--panel'); ctx.fillRect(0,0,W,W);
+    ctx.fillStyle=css('--grid');
+    for(var x=0;x<N;x++)for(var y=0;y<N;y++){if((x+y)%2===0)ctx.fillRect(x*c,y*c,c,c)}
+    if(!snake)return;
+    if(food){ctx.fillStyle=css('--food');ctx.beginPath();ctx.arc((food.x+.5)*c,(food.y+.55)*c,c*.36,0,7);ctx.fill();
+      ctx.fillStyle=css('--snake');rr((food.x+.46)*c,(food.y+.08)*c,c*.1,c*.2,2)}
+    var p=c*.08;
+    snake.forEach(function(s,i){
+      ctx.fillStyle=css(i===0?'--snake-head':'--snake');
+      rr(s.x*c+p,s.y*c+p,c-2*p,c-2*p,c*.28);
+    });
+    var h=snake[0], v=DIRS[dir], ex=h.x*c+c/2, ey=h.y*c+c/2, px=-v[1], py=v[0];
+    ctx.fillStyle=css('--panel');
+    [-1,1].forEach(function(k){ctx.beginPath();ctx.arc(ex+v[0]*c*.14+px*k*c*.17,ey+v[1]*c*.14+py*k*c*.17,c*.075,0,7);ctx.fill()});
+  }
+
+  var keys={ArrowUp:'u',ArrowDown:'d',ArrowLeft:'l',ArrowRight:'r',w:'u',s:'d',a:'l',d:'r',W:'u',S:'d',A:'l',D:'r'};
+  document.addEventListener('keydown',function(e){
+    if(e.key===' '||e.code==='Space'){
+      e.preventDefault();
+      if(state==='ready'||state==='over')start();else togglePause();return;
+    }
+    var d=keys[e.key]; if(d){e.preventDefault();turn(d)}
+  });
+  document.querySelectorAll('.pad button').forEach(function(b){
+    b.addEventListener('pointerdown',function(e){e.preventDefault();turn(b.dataset.d)});
+  });
+  var t0=null;
+  cv.addEventListener('touchstart',function(e){var t=e.changedTouches[0];t0={x:t.clientX,y:t.clientY}},{passive:true});
+  cv.addEventListener('touchend',function(e){
+    if(!t0)return; var t=e.changedTouches[0], dx=t.clientX-t0.x, dy=t.clientY-t0.y; t0=null;
+    if(Math.max(Math.abs(dx),Math.abs(dy))<18)return;
+    turn(Math.abs(dx)>Math.abs(dy)?(dx>0?'r':'l'):(dy>0?'d':'u'));
+  },{passive:true});
+  go.addEventListener('click',function(){state==='paused'?togglePause():start()});
+  pauseB.addEventListener('click',togglePause);
+  wallsB.addEventListener('click',function(){
+    if(state==='playing')return;
+    wrap=!wrap; wallsB.setAttribute('aria-pressed',wrap); wallsB.textContent='Paredes: '+(wrap?'se atraviesan':'mortales');
+  });
+  window.addEventListener('resize',fit);
+  if(window.matchMedia)window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change',draw);
+  reset(); fit(); showOverlay('Listo para jugar','Come las manzanas y no choques.','Jugar');
+  if(DEMO){document.body.classList.add('demo');document.documentElement.setAttribute('data-theme','dark');setTimeout(function(){fit();start()},50)}
+})();
+</script>
