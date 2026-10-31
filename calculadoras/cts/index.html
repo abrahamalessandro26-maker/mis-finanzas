@@ -38,7 +38,7 @@
   .opciones label:has(input:checked){border-color:var(--verde);background:var(--verde-claro);font-weight:600}
   .grid6{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
   .grid6 label{font-size:.85rem;color:var(--gris);display:block;margin-bottom:3px}
-  .oculto{display:none}
+  .oculto{display:none !important}
   .check{display:flex;gap:8px;align-items:center;font-size:.92rem;margin-top:8px}
   .check input{accent-color:var(--verde);width:18px;height:18px}
   button.calcular{width:100%;background:var(--verde);color:#fff;border:0;border-radius:12px;padding:15px;font-size:1.05rem;font-weight:700;cursor:pointer}
@@ -70,7 +70,7 @@
 <header>
   <div class="nav">
     <a class="logo" href="https://finanzasevan.com">Finanzas Evan</a>
-    <a class="btn-nav" href="https://finanzasevan.com/app">Usar la app →</a>
+    <a class="btn-nav" href="https://finanzasevan.com/activar">Usar la app →</a>
   </div>
 </header>
 
@@ -150,8 +150,8 @@
 
     <div class="cta">
       <h3>¿Ya sabes qué harás con tu CTS?</h3>
-      <p>Organiza tu dinero, ponte metas de ahorro y controla tus gastos con Finanzas Evan. Es gratis.</p>
-      <a href="https://finanzasevan.com/app" id="ctaApp">Crear mi cuenta gratis →</a>
+      <p>Organiza tu dinero, ponte metas de ahorro y controla tus gastos con Finanzas Evan.</p>
+      <a href="https://finanzasevan.com/activar" id="ctaApp">Conoce Finanzas Evan →</a>
     </div>
 
     <!-- Se muestra solo si configuras CONFIG.emailEndpoint -->
