@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="es-PE">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calculadora de CTS Noviembre 2026 Perú | Finanzas Evan</title>
+<meta name="description" content="Calcula gratis tu CTS de noviembre 2026. Para sueldo fijo o con comisiones, régimen general y pequeña empresa. Resultado al instante con el detalle del cálculo.">
+<link rel="canonical" href="https://finanzasevan.com/calculadoras/cts">
+<meta property="og:title" content="Calculadora de CTS 2026 - Finanzas Evan">
+<meta property="og:description" content="Calcula tu CTS en segundos: sueldo fijo o con comisiones.">
+<meta property="og:url" content="https://finanzasevan.com/calculadoras/cts">
+<meta property="og:type" content="website">
+<style>
+  :root{
+    --verde:#0f7b5f; --verde-osc:#0a5a45; --verde-claro:#e8f5f0;
+    --texto:#1d2a26; --gris:#5d6b66; --borde:#d6e0dc; --fondo:#f6f8f7;
+    --alerta:#fff6e5; --alerta-borde:#f0c36d; --error:#b42318;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:var(--texto);background:var(--fondo);line-height:1.55}
+  header{background:#fff;border-bottom:1px solid var(--borde)}
+  .nav{max-width:760px;margin:0 auto;padding:14px 18px;display:flex;justify-content:space-between;align-items:center}
+  .logo{font-weight:800;color:var(--verde);text-decoration:none;font-size:1.15rem}
+  .nav a.btn-nav{font-size:.9rem;color:var(--verde);text-decoration:none;font-weight:600}
+  main{max-width:760px;margin:0 auto;padding:24px 18px 60px}
+  h1{font-size:1.75rem;line-height:1.2;margin:0 0 8px}
+  .sub{color:var(--gris);margin:0 0 22px}
+  .card{background:#fff;border:1px solid var(--borde);border-radius:14px;padding:22px;margin-bottom:20px}
+  .campo{margin-bottom:18px}
+  label.tit{display:block;font-weight:650;margin-bottom:6px}
+  .ayuda{font-size:.85rem;color:var(--gris);margin-top:4px}
+  input[type=number],input[type=date],input[type=email],select{
+    width:100%;padding:12px 14px;border:1px solid var(--borde);border-radius:10px;font-size:1rem;background:#fff;color:var(--texto)}
+  input:focus,select:focus{outline:2px solid var(--verde);border-color:var(--verde)}
+  .opciones{display:flex;gap:10px;flex-wrap:wrap}
+  .opciones label{flex:1;min-width:120px;border:1px solid var(--borde);border-radius:10px;padding:11px 12px;cursor:pointer;display:flex;gap:8px;align-items:center;font-size:.95rem}
+  .opciones input{accent-color:var(--verde)}
+  .opciones label:has(input:checked){border-color:var(--verde);background:var(--verde-claro);font-weight:600}
+  .grid6{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+  .grid6 label{font-size:.85rem;color:var(--gris);display:block;margin-bottom:3px}
+  .oculto{display:none}
+  .check{display:flex;gap:8px;align-items:center;font-size:.92rem;margin-top:8px}
+  .check input{accent-color:var(--verde);width:18px;height:18px}
+  button.calcular{width:100%;background:var(--verde);color:#fff;border:0;border-radius:12px;padding:15px;font-size:1.05rem;font-weight:700;cursor:pointer}
+  button.calcular:hover{background:var(--verde-osc)}
+  .error{color:var(--error);font-size:.9rem;margin-top:10px}
+  #resultado .monto{font-size:2.3rem;font-weight:800;color:var(--verde);margin:4px 0 2px}
+  #resultado .fecha{color:var(--gris);font-size:.92rem;margin:0 0 16px}
+  table{width:100%;border-collapse:collapse;font-size:.94rem}
+  td{padding:9px 0;border-bottom:1px solid var(--borde)}
+  td:last-child{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+  tr.total td{font-weight:700;border-bottom:0}
+  .nota{background:var(--alerta);border:1px solid var(--alerta-borde);border-radius:10px;padding:11px 13px;font-size:.88rem;margin-top:14px}
+  .cta{background:linear-gradient(135deg,var(--verde),var(--verde-osc));color:#fff;border-radius:14px;padding:22px;margin-top:18px}
+  .cta h3{margin:0 0 6px;font-size:1.2rem}
+  .cta p{margin:0 0 14px;opacity:.95}
+  .cta a{display:inline-block;background:#fff;color:var(--verde-osc);font-weight:700;text-decoration:none;padding:12px 18px;border-radius:10px}
+  .correo{margin-top:16px;display:flex;gap:8px;flex-wrap:wrap}
+  .correo input{flex:1;min-width:200px}
+  .correo button{background:var(--texto);color:#fff;border:0;border-radius:10px;padding:12px 16px;font-weight:600;cursor:pointer}
+  article h2{font-size:1.3rem;margin:28px 0 8px}
+  article h3{font-size:1.05rem;margin:18px 0 6px}
+  article p,article li{color:#33413c}
+  footer{text-align:center;color:var(--gris);font-size:.85rem;padding:24px 18px;border-top:1px solid var(--borde);background:#fff}
+  @media(max-width:520px){.grid6{grid-template-columns:repeat(2,1fr)} h1{font-size:1.45rem}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="nav">
+    <a class="logo" href="https://finanzasevan.com">Finanzas Evan</a>
+    <a class="btn-nav" href="https://finanzasevan.com/app">Usar la app →</a>
+  </div>
+</header>
+
+<main>
+  <h1>Calculadora de CTS – Noviembre 2026</h1>
+  <p class="sub">Calcula cuánto te deben depositar de CTS. Funciona si ganas sueldo fijo o si cobras comisiones. Gratis y al instante.</p>
+
+  <!-- ================= FORMULARIO ================= -->
+  <section class="card" aria-label="Calculadora">
+
+    <div class="campo">
+      <label class="tit">¿En qué tipo de empresa trabajas?</label>
+      <div class="opciones">
+        <label><input type="radio" name="regimen" value="general" checked> Régimen general</label>
+        <label><input type="radio" name="regimen" value="pequena"> Pequeña empresa</label>
+        <label><input type="radio" name="regimen" value="micro"> Microempresa</label>
+      </div>
+      <div class="ayuda">Si no sabes, pregunta en RR.HH. La mayoría de empresas medianas y grandes son régimen general.</div>
+    </div>
+
+    <div class="campo">
+      <label class="tit" for="basico">Sueldo básico mensual (S/)</label>
+      <input type="number" id="basico" min="0" step="0.01" inputmode="decimal" placeholder="Ej: 1500">
+      <div class="ayuda">El sueldo fijo que figura en tu boleta, sin descuentos.</div>
+    </div>
+
+    <div class="campo">
+      <label class="tit">¿Recibes asignación familiar?</label>
+      <div class="opciones">
+        <label><input type="radio" name="asig" value="si"> Sí</label>
+        <label><input type="radio" name="asig" value="no" checked> No</label>
+      </div>
+      <div class="ayuda">Es el pago por tener hijos menores de 18 años. Hoy equivale a S/ <span id="montoAsig"></span>.</div>
+    </div>
+
+    <div class="campo">
+      <label class="tit">¿Recibes comisiones, horas extra o bonos que varían cada mes?</label>
+      <div class="opciones">
+        <label><input type="radio" name="variable" value="no" checked> No, solo sueldo fijo</label>
+        <label><input type="radio" name="variable" value="si"> Sí</label>
+      </div>
+      <div id="bloqueVariable" class="oculto" style="margin-top:14px">
+        <div class="ayuda" style="margin-bottom:10px">Escribe cuánto cobraste en cada mes. Si un mes no cobraste nada, déjalo vacío.</div>
+        <div class="grid6" id="mesesVariable"></div>
+      </div>
+    </div>
+
+    <div class="campo">
+      <label class="tit">¿Trabajaste todo el periodo (<span class="txtPeriodo"></span>)?</label>
+      <div class="opciones">
+        <label><input type="radio" name="completo" value="si" checked> Sí, completo</label>
+        <label><input type="radio" name="completo" value="no"> No, entré después</label>
+      </div>
+      <div id="bloqueIngreso" class="oculto" style="margin-top:12px">
+        <label class="tit" for="ingreso">Fecha en que empezaste a trabajar</label>
+        <input type="date" id="ingreso">
+      </div>
+    </div>
+
+    <div class="campo">
+      <label class="tit" for="grati">Gratificación que recibiste en julio (S/)</label>
+      <input type="number" id="grati" min="0" step="0.01" inputmode="decimal" placeholder="Ej: 1500">
+      <div class="ayuda">Sin contar la bonificación del 9%. Si entraste a trabajar después de junio, pon 0.</div>
+      <label class="check"><input type="checkbox" id="estimarGrati"> No me acuerdo, estímala por mí</label>
+    </div>
+
+    <button class="calcular" id="btnCalcular">Calcular mi CTS</button>
+    <div class="error" id="error" role="alert"></div>
+  </section>
+
+  <!-- ================= RESULTADO ================= -->
+  <section class="card oculto" id="resultado" aria-live="polite">
+    <div style="color:var(--gris);font-weight:600">Tu CTS de noviembre sería</div>
+    <div class="monto" id="rMonto"></div>
+    <p class="fecha" id="rFecha"></p>
+    <div class="nota" id="rNotas"></div>
+
+    <div class="cta">
+      <h3>¿Ya sabes qué harás con tu CTS?</h3>
+      <p>Organiza tu dinero, ponte metas de ahorro y controla tus gastos con Finanzas Evan. Es gratis.</p>
+      <a href="https://finanzasevan.com/app" id="ctaApp">Crear mi cuenta gratis →</a>
+    </div>
+
+    <!-- Se muestra solo si configuras CONFIG.emailEndpoint -->
+    <form class="correo oculto" id="formCorreo">
+      <input type="email" id="email" required placeholder="Tu correo para recibir el detalle">
+      <button type="submit">Enviarme el detalle</button>
+      <div class="ayuda" id="msgCorreo" style="width:100%"></div>
+    </form>
+  </section>
+
+</main>
+
+<footer>
+  © <span id="anio"></span> Finanzas Evan · Cálculo referencial basado en el D.S. 001-97-TR. Para casos especiales consulta con tu área de RR.HH.
+</footer>
+
+<script>
+/* ===================== CONFIGURACIÓN =====================
+   Actualiza estos valores cada periodo (mayo / noviembre).    */
+const CONFIG = {
+  rmv: 1230,                        // Sueldo mínimo vigente al cierre del periodo (oct-2026)
+  rmvGrati: 1130,                   // Sueldo mínimo que se usó en la grati de julio (para estimarla)
+  periodo: { inicio: '2026-05-01', fin: '2026-10-31' },
+  meses: ['Mayo','Junio','Julio','Agosto','Setiembre','Octubre'],
+  textoPeriodo: 'mayo a octubre 2026',
+  fechaDeposito: 'hasta el 15 de noviembre de 2026',
+  emailEndpoint: ''                 // URL de tu backend para enviar correos. Vacío = se oculta el formulario.
+};
+/* ======================================================== */
+
+const $ = id => document.getElementById(id);
+const radio = n => document.querySelector(`input[name="${n}"]:checked`).value;
+const soles = n => 'S/ ' + n.toLocaleString('es-PE',{minimumFractionDigits:2,maximumFractionDigits:2});
+const num = v => { const x = parseFloat(v); return isNaN(x) || x < 0 ? 0 : x; };
+
+// Inicializar textos
+const asigFam = CONFIG.rmv * 0.10;
+$('montoAsig').textContent = asigFam.toFixed(2);
+document.querySelectorAll('.txtPeriodo').forEach(e => e.textContent = CONFIG.textoPeriodo);
+$('anio').textContent = new Date().getFullYear();
+$('ingreso').min = CONFIG.periodo.inicio; $('ingreso').max = CONFIG.periodo.fin;
+$('mesesVariable').innerHTML = CONFIG.meses.map((m,i) =>
+  `<div><label for="v${i}">${m}</label><input type="number" id="v${i}" min="0" step="0.01" inputmode="decimal" placeholder="0"></div>`).join('');
+
+// Mostrar/ocultar bloques
+document.querySelectorAll('input[name="variable"]').forEach(r => r.addEventListener('change', () =>
+  $('bloqueVariable').classList.toggle('oculto', radio('variable') !== 'si')));
+document.querySelectorAll('input[name="completo"]').forEach(r => r.addEventListener('change', () =>
+  $('bloqueIngreso').classList.toggle('oculto', radio('completo') !== 'no')));
+$('estimarGrati').addEventListener('change', e => { $('grati').disabled = e.target.checked; if (e.target.checked) $('grati').value=''; });
+
+// Meses y días computables según fecha de ingreso
+function tiempoTrabajado() {
+  if (radio('completo') === 'si') return { meses: 6, dias: 0 };
+  const v = $('ingreso').value;
+  if (!v) return null;
+  const [y, m, d] = v.split('-').map(Number);
+  const ini = new Date(CONFIG.periodo.inicio + 'T00:00:00');
+  const fin = new Date(CONFIG.periodo.fin + 'T00:00:00');
+  const f = new Date(y, m-1, d);
+  if (f < ini) return { meses: 6, dias: 0 };
+  if (f > fin) return { meses: 0, dias: 0 };
+  // Meses completos después del mes de ingreso + días del mes de ingreso
+  const mesesRestantes = (fin.getMonth() - f.getMonth());
+  if (d === 1) return { meses: mesesRestantes + 1, dias: 0 };
+  const diasMes = new Date(y, m, 0).getDate();
+  const dias = Math.min(diasMes - d + 1, 30);
+  return { meses: mesesRestantes, dias };
+}
+
+function calcular() {
+  $('error').textContent = '';
+  const regimen = radio('regimen');
+  const basico = num($('basico').value);
+
+  if (regimen === 'micro') {
+    mostrarResultado({ micro: true });
+    return;
+  }
+  if (basico <= 0) { $('error').textContent = 'Ingresa tu sueldo básico.'; return; }
+
+  const t = tiempoTrabajado();
+  if (!t) { $('error').textContent = 'Ingresa tu fecha de ingreso.'; return; }
+  if (t.meses === 0 && t.dias < 30) {
+    mostrarResultado({ sinDerecho: true }); return;
+  }
+
+  const asig = radio('asig') === 'si' ? asigFam : 0;
+
+  // Remuneraciones variables: regla de al menos 3 de 6 meses
+  let promVar = 0, mesesConVar = 0, sumaVar = 0, tieneVar = radio('variable') === 'si';
+  if (tieneVar) {
+    for (let i = 0; i < 6; i++) { const x = num($('v'+i).value); if (x > 0) { mesesConVar++; sumaVar += x; } }
+    if (mesesConVar >= 3) promVar = sumaVar / 6;
+  }
+
+  // Gratificación de julio
+  const factor = regimen === 'pequena' ? 0.5 : 1;
+  let grati, gratiEstimada = false;
+  if ($('estimarGrati').checked) {
+    gratiEstimada = true;
+    const asigGrati = radio('asig') === 'si' ? CONFIG.rmvGrati * 0.10 : 0;
+    // Estimación: semestre ene-jun completo solo si ingresó antes de enero
+    const fIng = $('ingreso').value;
+    const trabajoEneJun = radio('completo') === 'si' || (fIng && fIng < CONFIG.periodo.inicio);
+    grati = trabajoEneJun ? (basico + asigGrati + promVar) * factor : 0;
+  } else {
+    grati = num($('grati').value);
+  }
+  const sextoGrati = grati / 6;
+
+  const rc = basico + asig + promVar + sextoGrati;
+  const porMeses = rc / 12 * t.meses;
+  const porDias = rc / 360 * t.dias;
+  const cts = (porMeses + porDias) * factor;
+
+  mostrarResultado({ basico, asig, promVar, tieneVar, mesesConVar, sumaVar, grati, sextoGrati, gratiEstimada,
+                     rc, t, porMeses, porDias, factor, cts, regimen });
+}
+
+function mostrarResultado(r) {
+  const box = $('resultado');
+  box.classList.remove('oculto');
+  if (r.micro) {
+    $('rMonto').textContent = 'S/ 0.00';
+    $('rFecha').textContent = 'En la microempresa no corresponde CTS.';
+    $('rNotas').innerHTML = 'Los trabajadores de microempresas inscritas en el REMYPE no reciben CTS ni gratificaciones. Si tu empresa no está inscrita en el REMYPE, te corresponde el régimen general.';
+  } else if (r.sinDerecho) {
+    $('rMonto').textContent = 'S/ 0.00';
+    $('rFecha').textContent = 'Aún no te corresponde CTS en este periodo.';
+    $('rNotas').innerHTML = 'Para recibir CTS necesitas al menos un mes completo de trabajo. Lo trabajado ahora se sumará a tu próximo depósito en mayo.';
+  } else {
+    $('rMonto').textContent = soles(r.cts);
+    $('rFecha').textContent = 'Depósito ' + CONFIG.fechaDeposito + ' · ' +
+      r.t.meses + (r.t.meses === 1 ? ' mes' : ' meses') + (r.t.dias ? ' y ' + r.t.dias + ' días' : '') + ' trabajados';
+    $('rNotas').innerHTML = 'Cálculo referencial. Faltas, licencias sin goce u otros casos especiales pueden cambiar el monto.' +
+      (r.gratiEstimada ? ' La gratificación de julio fue estimada; para mayor precisión usa el monto de tu boleta.' : '');
+    ultimoResultado = r;
+  }
+  if (CONFIG.emailEndpoint) $('formCorreo').classList.remove('oculto');
+  box.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+let ultimoResultado = null;
+$('btnCalcular').addEventListener('click', calcular);
+
+// Envío por correo (requiere backend en CONFIG.emailEndpoint)
+$('formCorreo').addEventListener('submit', async e => {
+  e.preventDefault();
+  $('msgCorreo').textContent = 'Enviando...';
+  try {
+    const res = await fetch(CONFIG.emailEndpoint, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: $('email').value, calculadora: 'cts', resultado: ultimoResultado })
+    });
+    $('msgCorreo').textContent = res.ok ? '¡Listo! Revisa tu correo.' : 'No se pudo enviar. Intenta de nuevo.';
+  } catch { $('msgCorreo').textContent = 'No se pudo enviar. Intenta de nuevo.'; }
+});
+</script>
+
+</body>
+</html>
