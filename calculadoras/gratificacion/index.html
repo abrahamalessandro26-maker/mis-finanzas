@@ -1,1 +1,249 @@
+<!DOCTYPE html>
+<html lang="es-PE">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calculadora de Gratificación Diciembre 2026 Perú | Finanzas Evan</title>
+<meta name="description" content="Calcula gratis tu gratificación de diciembre 2026 con la bonificación del 9%. Para sueldo fijo o con comisiones, régimen general y pequeña empresa.">
+<link rel="canonical" href="https://finanzasevan.com/calculadoras/gratificacion">
+<meta property="og:title" content="Calculadora de Gratificación 2026 - Finanzas Evan">
+<meta property="og:description" content="Calcula tu gratificación de diciembre en segundos: sueldo fijo o con comisiones.">
+<meta property="og:url" content="https://finanzasevan.com/calculadoras/gratificacion">
+<meta property="og:type" content="website">
+<style>
+  :root{
+    --verde:#0f7b5f; --verde-osc:#0a5a45; --verde-claro:#e8f5f0;
+    --texto:#1d2a26; --gris:#5d6b66; --borde:#d6e0dc; --fondo:#f6f8f7;
+    --alerta:#fff6e5; --alerta-borde:#f0c36d; --error:#b42318;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:var(--texto);background:var(--fondo);line-height:1.55}
+  header{background:#fff;border-bottom:1px solid var(--borde)}
+  .nav{max-width:760px;margin:0 auto;padding:14px 18px;display:flex;justify-content:space-between;align-items:center}
+  .logo{font-weight:800;color:var(--verde);text-decoration:none;font-size:1.15rem}
+  .nav a.btn-nav{font-size:.9rem;color:var(--verde);text-decoration:none;font-weight:600}
+  main{max-width:760px;margin:0 auto;padding:24px 18px 60px}
+  h1{font-size:1.75rem;line-height:1.2;margin:0 0 8px}
+  .sub{color:var(--gris);margin:0 0 22px}
+  .card{background:#fff;border:1px solid var(--borde);border-radius:14px;padding:22px;margin-bottom:20px}
+  .campo{margin-bottom:18px}
+  label.tit{display:block;font-weight:650;margin-bottom:6px}
+  .ayuda{font-size:.85rem;color:var(--gris);margin-top:4px}
+  input[type=number],input[type=date],select{
+    width:100%;padding:12px 14px;border:1px solid var(--borde);border-radius:10px;font-size:1rem;background:#fff;color:var(--texto)}
+  input:focus,select:focus{outline:2px solid var(--verde);border-color:var(--verde)}
+  .opciones{display:flex;gap:10px;flex-wrap:wrap}
+  .opciones label{flex:1;min-width:120px;border:1px solid var(--borde);border-radius:10px;padding:11px 12px;cursor:pointer;display:flex;gap:8px;align-items:center;font-size:.95rem}
+  .opciones input{accent-color:var(--verde)}
+  .opciones label:has(input:checked){border-color:var(--verde);background:var(--verde-claro);font-weight:600}
+  .grid6{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+  .grid6 label{font-size:.85rem;color:var(--gris);display:block;margin-bottom:3px}
+  .oculto{display:none !important}
+  button.calcular{width:100%;background:var(--verde);color:#fff;border:0;border-radius:12px;padding:15px;font-size:1.05rem;font-weight:700;cursor:pointer}
+  button.calcular:hover{background:var(--verde-osc)}
+  .error{color:var(--error);font-size:.9rem;margin-top:10px}
+  #resultado .monto{font-size:2.3rem;font-weight:800;color:var(--verde);margin:4px 0 2px}
+  #resultado .fecha{color:var(--gris);font-size:.92rem;margin:0 0 16px}
+  .nota{background:var(--alerta);border:1px solid var(--alerta-borde);border-radius:10px;padding:11px 13px;font-size:.88rem;margin-top:14px}
+  .cta{background:linear-gradient(135deg,var(--verde),var(--verde-osc));color:#fff;border-radius:14px;padding:22px;margin-top:18px}
+  .cta h3{margin:0 0 6px;font-size:1.2rem}
+  .cta p{margin:0 0 14px;opacity:.95}
+  .cta a{display:inline-block;background:#fff;color:var(--verde-osc);font-weight:700;text-decoration:none;padding:12px 18px;border-radius:10px}
+  footer{text-align:center;color:var(--gris);font-size:.85rem;padding:24px 18px;border-top:1px solid var(--borde);background:#fff}
+  @media(max-width:520px){.grid6{grid-template-columns:repeat(2,1fr)} h1{font-size:1.45rem}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="nav">
+    <a class="logo" href="https://finanzasevan.com">Finanzas Evan</a>
+    <a class="btn-nav" href="https://finanzasevan.com/activar">Usar la app →</a>
+  </div>
+</header>
+
+<main>
+  <h1>Calculadora de Gratificación – Diciembre 2026</h1>
+  <p class="sub">Calcula cuánto te toca de gratificación, con la bonificación incluida. Funciona si ganas sueldo fijo o si cobras comisiones. Gratis y al instante.</p>
+
+  <section class="card" aria-label="Calculadora">
+
+    <div class="campo">
+      <label class="tit">¿En qué tipo de empresa trabajas?</label>
+      <div class="opciones">
+        <label><input type="radio" name="regimen" value="general" checked> Régimen general</label>
+        <label><input type="radio" name="regimen" value="pequena"> Pequeña empresa</label>
+        <label><input type="radio" name="regimen" value="micro"> Microempresa</label>
+      </div>
+      <div class="ayuda">Si no sabes, pregunta en RR.HH. La mayoría de empresas medianas y grandes son régimen general.</div>
+    </div>
+
+    <div class="campo">
+      <label class="tit" for="basico">Sueldo básico mensual (S/)</label>
+      <input type="number" id="basico" min="0" step="0.01" inputmode="decimal" placeholder="Ej: 1500">
+      <div class="ayuda">El sueldo fijo que figura en tu boleta, sin descuentos.</div>
+    </div>
+
+    <div class="campo">
+      <label class="tit">¿Recibes asignación familiar?</label>
+      <div class="opciones">
+        <label><input type="radio" name="asig" value="si"> Sí</label>
+        <label><input type="radio" name="asig" value="no" checked> No</label>
+      </div>
+      <div class="ayuda">Es el pago por tener hijos menores de 18 años. Hoy equivale a S/ <span id="montoAsig"></span>.</div>
+    </div>
+
+    <div class="campo">
+      <label class="tit">¿Recibes comisiones, horas extra o bonos que varían cada mes?</label>
+      <div class="opciones">
+        <label><input type="radio" name="variable" value="no" checked> No, solo sueldo fijo</label>
+        <label><input type="radio" name="variable" value="si"> Sí</label>
+      </div>
+      <div id="bloqueVariable" class="oculto" style="margin-top:14px">
+        <div class="ayuda" style="margin-bottom:10px">Escribe cuánto cobraste en cada mes. Si un mes no cobraste nada, déjalo vacío. Para diciembre puedes poner un estimado.</div>
+        <div class="grid6" id="mesesVariable"></div>
+      </div>
+    </div>
+
+    <div class="campo">
+      <label class="tit">¿Trabajaste todo el periodo (<span class="txtPeriodo"></span>)?</label>
+      <div class="opciones">
+        <label><input type="radio" name="completo" value="si" checked> Sí, completo</label>
+        <label><input type="radio" name="completo" value="no"> No, entré después</label>
+      </div>
+      <div id="bloqueIngreso" class="oculto" style="margin-top:12px">
+        <label class="tit" for="ingreso">Fecha en que empezaste a trabajar</label>
+        <input type="date" id="ingreso">
+      </div>
+    </div>
+
+    <div class="campo">
+      <label class="tit">¿Cuál es tu seguro de salud?</label>
+      <div class="opciones">
+        <label><input type="radio" name="seguro" value="essalud" checked> EsSalud</label>
+        <label><input type="radio" name="seguro" value="eps"> EPS</label>
+      </div>
+      <div class="ayuda">Si no sabes, deja EsSalud. Es lo más común.</div>
+    </div>
+
+    <button class="calcular" id="btnCalcular">Calcular mi gratificación</button>
+    <div class="error" id="error" role="alert"></div>
+  </section>
+
+  <section class="card oculto" id="resultado" aria-live="polite">
+    <div style="color:var(--gris);font-weight:600">Tu gratificación de diciembre sería</div>
+    <div class="monto" id="rMonto"></div>
+    <p class="fecha" id="rFecha"></p>
+    <div class="nota" id="rNotas"></div>
+
+    <div class="cta">
+      <h3>¿Ya sabes qué harás con tu gratificación?</h3>
+      <p>Organiza tu dinero, ponte metas de ahorro y controla tus gastos con Finanzas Evan.</p>
+      <a href="https://finanzasevan.com/activar" id="ctaApp">Conoce Finanzas Evan →</a>
+    </div>
+  </section>
+</main>
+
+<footer>
+  © <span id="anio"></span> Finanzas Evan · Cálculo referencial basado en la Ley 27735. Para casos especiales consulta con tu área de RR.HH.
+</footer>
+
+<script>
+/* ===================== CONFIGURACIÓN =====================
+   Actualiza estos valores cada periodo (julio / diciembre).   */
+const CONFIG = {
+  rmv: 1230,                        // Sueldo mínimo vigente en diciembre 2026
+  periodo: { inicio: '2026-07-01', fin: '2026-12-31' },
+  meses: ['Julio','Agosto','Setiembre','Octubre','Noviembre','Diciembre'],
+  textoPeriodo: 'julio a diciembre 2026',
+  fechaPago: 'hasta el 15 de diciembre de 2026',
+  tasaEssalud: 0.09,                // Bonificación extraordinaria con EsSalud
+  tasaEps: 0.0675                   // Bonificación extraordinaria con EPS
+};
+/* ======================================================== */
+
+const $ = id => document.getElementById(id);
+const radio = n => document.querySelector(`input[name="${n}"]:checked`).value;
+const soles = n => 'S/ ' + n.toLocaleString('es-PE',{minimumFractionDigits:2,maximumFractionDigits:2});
+const num = v => { const x = parseFloat(v); return isNaN(x) || x < 0 ? 0 : x; };
+
+const asigFam = CONFIG.rmv * 0.10;
+$('montoAsig').textContent = asigFam.toFixed(2);
+document.querySelectorAll('.txtPeriodo').forEach(e => e.textContent = CONFIG.textoPeriodo);
+$('anio').textContent = new Date().getFullYear();
+$('ingreso').min = CONFIG.periodo.inicio; $('ingreso').max = CONFIG.periodo.fin;
+$('mesesVariable').innerHTML = CONFIG.meses.map((m,i) =>
+  `<div><label for="v${i}">${m}</label><input type="number" id="v${i}" min="0" step="0.01" inputmode="decimal" placeholder="0"></div>`).join('');
+
+document.querySelectorAll('input[name="variable"]').forEach(r => r.addEventListener('change', () =>
+  $('bloqueVariable').classList.toggle('oculto', radio('variable') !== 'si')));
+document.querySelectorAll('input[name="completo"]').forEach(r => r.addEventListener('change', () =>
+  $('bloqueIngreso').classList.toggle('oculto', radio('completo') !== 'no')));
+
+// La gratificación solo cuenta meses calendario COMPLETOS
+function mesesCompletos() {
+  if (radio('completo') === 'si') return 6;
+  const v = $('ingreso').value;
+  if (!v) return null;
+  if (v < CONFIG.periodo.inicio) return 6;
+  if (v > CONFIG.periodo.fin) return 0;
+  const [y, m, d] = v.split('-').map(Number);
+  const mesFin = Number(CONFIG.periodo.fin.split('-')[1]);
+  return (mesFin - m) + (d === 1 ? 1 : 0);
+}
+
+function calcular() {
+  $('error').textContent = '';
+  const regimen = radio('regimen');
+  if (regimen === 'micro') { mostrar({ tipo: 'micro' }); return; }
+
+  const basico = num($('basico').value);
+  if (basico <= 0) { $('error').textContent = 'Ingresa tu sueldo básico.'; return; }
+
+  const meses = mesesCompletos();
+  if (meses === null) { $('error').textContent = 'Ingresa tu fecha de ingreso.'; return; }
+  if (meses < 1) { mostrar({ tipo: 'sinDerecho' }); return; }
+
+  const asig = radio('asig') === 'si' ? asigFam : 0;
+
+  // Variables: se incluyen si se cobraron en al menos 3 de los 6 meses
+  let promVar = 0;
+  if (radio('variable') === 'si') {
+    let conVar = 0, suma = 0;
+    for (let i = 0; i < 6; i++) { const x = num($('v'+i).value); if (x > 0) { conVar++; suma += x; } }
+    if (conVar >= 3) promVar = suma / 6;
+  }
+
+  const factor = regimen === 'pequena' ? 0.5 : 1;
+  const rc = basico + asig + promVar;
+  const grati = rc / 6 * meses * factor;
+  const tasa = radio('seguro') === 'eps' ? CONFIG.tasaEps : CONFIG.tasaEssalud;
+  const bono = grati * tasa;
+
+  mostrar({ tipo: 'ok', total: grati + bono, meses, tasa });
+}
+
+function mostrar(r) {
+  $('resultado').classList.remove('oculto');
+  if (r.tipo === 'micro') {
+    $('rMonto').textContent = 'S/ 0.00';
+    $('rFecha').textContent = 'En la microempresa no corresponde gratificación.';
+    $('rNotas').textContent = 'Los trabajadores de microempresas inscritas en el REMYPE no reciben gratificación ni CTS. Si tu empresa no está inscrita en el REMYPE, te corresponde el régimen general.';
+  } else if (r.tipo === 'sinDerecho') {
+    $('rMonto').textContent = 'S/ 0.00';
+    $('rFecha').textContent = 'Aún no te corresponde gratificación en este periodo.';
+    $('rNotas').textContent = 'Para recibir gratificación necesitas al menos un mes calendario completo trabajado en el semestre.';
+  } else {
+    $('rMonto').textContent = soles(r.total);
+    $('rFecha').textContent = 'Pago ' + CONFIG.fechaPago + ' · ' + r.meses + (r.meses === 1 ? ' mes completo' : ' meses completos') +
+      ' · incluye bonificación del ' + (r.tasa * 100).toLocaleString('es-PE') + '%';
+    $('rNotas').textContent = 'Cálculo referencial. Faltas, licencias sin goce u otros casos especiales pueden cambiar el monto. Si tu sueldo es alto, se te puede descontar impuesto a la renta.';
+  }
+  $('resultado').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+$('btnCalcular').addEventListener('click', calcular);
+</script>
+</body>
+</html>
 
